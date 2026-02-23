@@ -1,1 +1,262 @@
-nothin
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmarklet Heaven | TheMaker777</title>
+    <!-- Tailwind CSS for layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- External Shared CSS link -->
+    <link rel="stylesheet" href="../style.css">
+
+    <style>
+        /* Glass panel container */
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(5px);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        /* Bookmarklet Row Styling */
+        .bookmarklet-row {
+            display: flex;
+            flex-direction: column;
+            md:flex-row;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 1rem;
+            border: 1px solid #333;
+            background: rgba(0, 0, 0, 0.6);
+            transition: all 0.2s ease;
+            margin-bottom: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .bookmarklet-row {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+
+        .bookmarklet-row:hover {
+            border-color: #555;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Draggable Button Styling */
+        .drag-btn {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            border: 1px solid #4ade80; /* Hacker Green */
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: grab;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            white-space: nowrap;
+            margin-top: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .drag-btn {
+                margin-top: 0;
+                margin-left: 1rem;
+            }
+        }
+
+        .drag-btn:hover {
+            background: #4ade80;
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+        }
+
+        .drag-btn:active {
+            cursor: grabbing;
+            transform: translateY(0);
+        }
+
+        .interactive-area {
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Interactive Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Content -->
+    <main class="content-wrapper w-full max-w-4xl mx-auto pt-24 md:pt-32 pb-20">
+        
+        <div class="w-full flex justify-start interactive-area mb-8">
+            <a href="./index.html" class="link-item">
+                [ <- Return to Directory ]
+            </a>
+        </div>
+
+        <div class="w-full text-left interactive-area mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Bookmarklet_Heaven</h1>
+            <p class="text-gray-400 text-sm tracking-widest uppercase">Script Injection Repository</p>
+        </div>
+
+        <!-- Instructions Panel -->
+        <div class="w-full interactive-area mb-10 p-6 border border-gray-700 rounded-md bg-black bg-opacity-40 backdrop-blur-sm">
+            <h3 class="text-lg font-bold text-white mb-3">Standard Operating Procedure:</h3>
+            <ol class="list-decimal list-inside text-gray-300 text-sm space-y-2">
+                <li>Make sure your browser's <strong>Bookmarks Bar</strong> is visible (usually <kbd class="bg-gray-800 px-1 rounded">Ctrl+Shift+B</kbd>).</li>
+                <li>Click and hold on any green <span class="text-green-400 border border-green-400 px-1 rounded text-xs">[DRAG ME]</span> button below.</li>
+                <li>Drag the button up to your bookmarks bar and drop it there.</li>
+                <li>Go to any webpage and click your new bookmark to execute the script!</li>
+                <li class="text-gray-500 italic mt-2">*Note: You can also just click them here to test them on this page!</li>
+            </ol>
+        </div>
+        
+        <!-- Category 1: Page Modifiers -->
+        <div class="w-full interactive-area glass-panel">
+            <h2 class="text-xl font-bold mb-6 border-b border-gray-700 pb-2 text-blue-400">/// Page_Modifiers</h2>
+            
+            <!-- Bookmarklet -->
+            <div class="bookmarklet-row">
+                <div>
+                    <h4 class="text-white font-bold text-lg">Edit Any Page</h4>
+                    <p class="text-gray-400 text-sm mt-1">Turns the entire webpage into a text editor. Click anywhere and start typing to change the text.</p>
+                </div>
+                <a href="javascript:document.body.contentEditable='true'; document.designMode='on'; void 0" class="drag-btn" title="Drag to Bookmarks Bar">
+                    Edit Page
+                </a>
+            </div>
+
+            <!-- Bookmarklet -->
+            <div class="bookmarklet-row">
+                <div>
+                    <h4 class="text-white font-bold text-lg">Reveal Passwords</h4>
+                    <p class="text-gray-400 text-sm mt-1">Changes all hidden password boxes (***) on the page into readable text.</p>
+                </div>
+                <a href="javascript:(function(){var inputs=document.getElementsByTagName('input');for(var i=0;i<inputs.length;i++){if(inputs[i].type=='password'){inputs[i].type='text';}}})();" class="drag-btn" title="Drag to Bookmarks Bar">
+                    Show Passwords
+                </a>
+            </div>
+
+            <!-- Bookmarklet -->
+            <div class="bookmarklet-row">
+                <div>
+                    <h4 class="text-white font-bold text-lg">Instant Dark Mode</h4>
+                    <p class="text-gray-400 text-sm mt-1">Forces a crude dark mode onto websites that are too bright by inverting background colors.</p>
+                </div>
+                <a href="javascript:(function(){let style=document.createElement('style');style.innerHTML='html,body{background-color:#121212!important;color:#ffffff!important;} *{background-color:inherit!important;color:inherit!important;}';document.head.appendChild(style);})();" class="drag-btn" title="Drag to Bookmarks Bar">
+                    Dark Mode
+                </a>
+            </div>
+        </div>
+
+        <!-- Category 2: Visual Chaos -->
+        <div class="w-full interactive-area glass-panel">
+            <h2 class="text-xl font-bold mb-6 border-b border-gray-700 pb-2 text-purple-400">/// Visual_Chaos</h2>
+            
+            <!-- Bookmarklet -->
+            <div class="bookmarklet-row">
+                <div>
+                    <h4 class="text-white font-bold text-lg">Spin Page</h4>
+                    <p class="text-gray-400 text-sm mt-1">Does exactly what it sounds like. Grabs the entire webpage and spins it 360 degrees.</p>
+                </div>
+                <a href="javascript:(function(){document.body.style.transition='transform 3s';document.body.style.transform='rotate(3600deg)';setTimeout(function(){document.body.style.transform='';},3000)})();" class="drag-btn" title="Drag to Bookmarks Bar">
+                    Spin It
+                </a>
+            </div>
+
+            <!-- Bookmarklet -->
+            <div class="bookmarklet-row">
+                <div>
+                    <h4 class="text-white font-bold text-lg">Bouncy Images</h4>
+                    <p class="text-gray-400 text-sm mt-1">Makes every single image on the webpage start bouncing up and down uncontrollably.</p>
+                </div>
+                <a href="javascript:(function(){var imgs=document.getElementsByTagName('img');for(var i=0;i<imgs.length;i++){imgs[i].style.position='relative';var dir=1;setInterval((function(img){return function(){var top=parseInt(img.style.top||0);if(top>20)dir=-1;if(top<-20)dir=1;img.style.top=(top+dir)+'px';}})(imgs[i]),50);}})();" class="drag-btn" title="Drag to Bookmarks Bar">
+                    Bounce Imgs
+                </a>
+            </div>
+
+            <!-- Bookmarklet -->
+            <div class="bookmarklet-row">
+                <div>
+                    <h4 class="text-white font-bold text-lg">Rainbow Background</h4>
+                    <p class="text-gray-400 text-sm mt-1">Flash warning! Rapidly cycles the background color of the site through the rainbow.</p>
+                </div>
+                <a href="javascript:(function(){var colors=['red','orange','yellow','green','blue','indigo','violet'];var i=0;setInterval(function(){document.body.style.backgroundColor=colors[i];i=(i+1)%colors.length;},500);})();" class="drag-btn" title="Drag to Bookmarks Bar">
+                    Rainbow
+                </a>
+            </div>
+        </div>
+
+        <!-- Category 3: Utilities -->
+        <div class="w-full interactive-area glass-panel">
+            <h2 class="text-xl font-bold mb-6 border-b border-gray-700 pb-2 text-yellow-400">/// Utilities</h2>
+            
+            <!-- Bookmarklet -->
+            <div class="bookmarklet-row">
+                <div>
+                    <h4 class="text-white font-bold text-lg">Highlight All Links</h4>
+                    <p class="text-gray-400 text-sm mt-1">Highlights every single clickable link on the page in bright yellow so you can't miss them.</p>
+                </div>
+                <a href="javascript:(function(){var links=document.getElementsByTagName('a');for(var i=0;i<links.length;i++){links[i].style.backgroundColor='yellow';links[i].style.color='black';}})();" class="drag-btn" title="Drag to Bookmarks Bar">
+                    Find Links
+                </a>
+            </div>
+
+            <!-- Bookmarklet -->
+            <div class="bookmarklet-row">
+                <div>
+                    <h4 class="text-white font-bold text-lg">Word Counter</h4>
+                    <p class="text-gray-400 text-sm mt-1">Pops up an alert telling you exactly how many words are written on the current webpage.</p>
+                </div>
+                <a href="javascript:(function(){alert('Estimated Word Count: '+document.body.innerText.split(/\s+/).length);})();" class="drag-btn" title="Drag to Bookmarks Bar">
+                    Count Words
+                </a>
+            </div>
+
+            <!-- Bookmarklet -->
+            <div class="bookmarklet-row">
+                <div>
+                    <h4 class="text-white font-bold text-lg">Auto-Scroll</h4>
+                    <p class="text-gray-400 text-sm mt-1">Starts slowly scrolling the webpage down automatically. Adds a button to the top right to stop it.</p>
+                </div>
+                <a href="javascript:(function(){var scroll=setInterval(function(){window.scrollBy(0,1);},15); var stop=document.createElement('button');stop.innerHTML='Stop Auto-Scroll';stop.style.position='fixed';stop.style.top='10px';stop.style.right='10px';stop.style.zIndex='999999';stop.style.padding='10px';stop.style.background='red';stop.style.color='white';stop.style.border='none';stop.style.cursor='pointer';stop.onclick=function(){clearInterval(scroll);stop.remove();};document.body.appendChild(stop);})();" class="drag-btn" title="Drag to Bookmarks Bar">
+                    Auto Scroll
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- External Shared JavaScript link -->
+    <script src="../background.js"></script>
+    
+    <!-- Prevent default clicking on buttons from navigating away (keeps user on the page while script executes) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dragBtns = document.querySelectorAll('.drag-btn');
+            dragBtns.forEach(btn => {
+                // Allows the script to run without trying to change the page URL if tested locally
+                btn.addEventListener('click', (e) => {
+                    // We don't prevent default entirely, because we WANT the javascript: to execute
+                    // but it's good to ensure it doesn't cause any weird jumps.
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -21,6 +21,7 @@ window.addEventListener('mouseout', function() {
 class Particle {
     constructor(x, y, directionX, directionY, size, color) {
         this.x = x; this.y = y;
+        this.baseX = x; this.baseY = y;
         this.directionX = directionX; this.directionY = directionY;
         this.size = size; this.color = color;
         this.density = (Math.random() * 30) + 1;
@@ -34,25 +35,39 @@ class Particle {
     }
 
     update() {
-        if (this.x > canvas.width || this.x < 0) { this.directionX = -this.directionX; }
-        if (this.y > canvas.height || this.y < 0) { this.directionY = -this.directionY; }
+        // Move the base position constantly for the slow drift
+        this.baseX += this.directionX;
+        this.baseY += this.directionY;
+
+        // Bounce the base position off the edges instead of the particle itself
+        if (this.baseX > canvas.width || this.baseX < 0) { this.directionX = -this.directionX; }
+        if (this.baseY > canvas.height || this.baseY < 0) { this.directionY = -this.directionY; }
 
         let dx = mouse.x - this.x;
         let dy = mouse.y - this.y;
         let distance = Math.sqrt(dx*dx + dy*dy);
-        let forceDirectionX = dx / distance;
-        let forceDirectionY = dy / distance;
-        let force = (mouse.radius - distance) / mouse.radius;
-        let directionX = forceDirectionX * force * this.density;
-        let directionY = forceDirectionY * force * this.density;
-
+        
         if (distance < mouse.radius) {
+            let forceDirectionX = dx / distance;
+            let forceDirectionY = dy / distance;
+            let force = (mouse.radius - distance) / mouse.radius;
+            let directionX = forceDirectionX * force * this.density;
+            let directionY = forceDirectionY * force * this.density;
+
             this.x -= directionX;
             this.y -= directionY;
+        } else {
+            // Return to the drifting base position when the mouse leaves to fill the hole
+            if (this.x !== this.baseX) {
+                let dx = this.x - this.baseX;
+                this.x -= dx / 20;
+            }
+            if (this.y !== this.baseY) {
+                let dy = this.y - this.baseY;
+                this.y -= dy / 20;
+            }
         }
 
-        this.x += this.directionX;
-        this.y += this.directionY;
         this.draw();
     }
 }

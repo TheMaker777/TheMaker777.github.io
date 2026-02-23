@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Logs | TheMaker777</title>
+    <!-- Tailwind CSS for layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- External Shared CSS link -->
+    <link rel="stylesheet" href="../style.css">
+
+    <style>
+        /* Glass panel container */
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(5px);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* IP List Styling */
+        .ip-item {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr; /* Forces exact centering */
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border: 1px solid #333;
+            background: rgba(0, 0, 0, 0.6);
+            transition: all 0.2s ease;
+            cursor: text;
+        }
+
+        .ip-item:hover {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.01); /* Pop out effect instead of indent */
+        }
+
+        .ip-status {
+            text-align: left;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+        }
+
+        .ip-name {
+            text-align: center;
+            color: #fff;
+            font-weight: bold;
+            letter-spacing: 0.025em;
+        }
+
+        .ip-address {
+            text-align: right;
+            color: #9ca3af;
+        }
+
+        .interactive-area {
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Interactive Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Content -->
+    <main class="content-wrapper w-full max-w-4xl mx-auto pt-24 md:pt-32">
+        
+        <div class="w-full flex justify-start interactive-area mb-8">
+            <a href="./index.html" class="link-item">
+                [ <- Return to Directory ]
+            </a>
+        </div>
+
+        <div class="w-full text-left interactive-area mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Network_Nodes</h1>
+            <p class="text-gray-400 text-sm tracking-widest uppercase">Target List / Active Scans</p>
+        </div>
+
+        <!-- URL Scanner Link Area -->
+        <div class="w-full interactive-area mb-10 border-l-2 border-gray-600 pl-4">
+            <p class="text-gray-400 text-sm mb-3">External Analysis Tool:</p>
+            <a href="https://urlscan.io/" target="_blank" class="link-item !border-gray-500 hover:!border-white inline-block">
+                [ Launch URL Scanner ]
+            </a>
+        </div>
+        
+        <!-- IP List Container -->
+        <div class="w-full interactive-area glass-panel">
+            <h2 class="text-xl font-bold mb-6 border-b border-gray-700 pb-2">Potential_Targets.log</h2>
+            
+            <div class="space-y-3 font-mono text-sm md:text-base">
+                
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">1346.lol</span><span class="ip-address text-xs md:text-sm">159.54.169.0</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[SLOW]</span><span class="ip-name">Acceleration</span><span class="ip-address text-xs md:text-sm">141.148.134.230</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[STAGNANT]</span><span class="ip-name">Arsenic</span><span class="ip-address text-xs md:text-sm">66.179.254.164</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Art Class</span><span class="ip-address text-xs md:text-sm">198.251.90.4</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Astro</span><span class="ip-address text-xs md:text-sm">104.243.37.85</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Astroid</span><span class="ip-address text-xs md:text-sm">5.161.68.227</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Bolt</span><span class="ip-address text-xs md:text-sm">104.36.85.232</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Bolt</span><span class="ip-address text-xs md:text-sm">104.36.86.24</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Boredom</span><span class="ip-address text-xs md:text-sm">152.53.36.42</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Breakium</span><span class="ip-address text-xs md:text-sm">172.93.100.82</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">BrunysIXLWork</span><span class="ip-address text-xs md:text-sm">185.211.4.69</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Canlite (3kh0 v5)</span><span class="ip-address text-xs md:text-sm">104.36.85.249</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Catway</span><span class="ip-address text-xs md:text-sm">A-92.38.148.24</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Comet/PXLNOVA</span><span class="ip-address text-xs md:text-sm">172.66.46.221</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Core</span><span class="ip-address text-xs md:text-sm">207.211.183.185</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Croxy Proxy</span><span class="ip-address text-xs md:text-sm">143.244.204.138</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Croxy Proxy</span><span class="ip-address text-xs md:text-sm">157.230.79.247</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Croxy Proxy</span><span class="ip-address text-xs md:text-sm">157.230.113.153</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Doge</span><span class="ip-address text-xs md:text-sm">163.123.192.252</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">DuckHTML</span><span class="ip-address text-xs md:text-sm">104.167.215.179</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Duckflix</span><span class="ip-address text-xs md:text-sm">104.21.54.237</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Emerald</span><span class="ip-address text-xs md:text-sm">66.23.198.136</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Emerald/Phantom/Glmkit</span><span class="ip-address text-xs md:text-sm">66.23.198.136</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Equinox</span><span class="ip-address text-xs md:text-sm">74.208.202.111</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">FalconLink</span><span class="ip-address text-xs md:text-sm">104.243.43.17</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Froggies Arcade</span><span class="ip-address text-xs md:text-sm">152.53.1.222</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Ghost</span><span class="ip-address text-xs md:text-sm">163.123.192.9</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">GlacierOS</span><span class="ip-address text-xs md:text-sm">66.241.124.98</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Glint Browser</span><span class="ip-address text-xs md:text-sm">104.243.38.141</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Gn-Math</span><span class="ip-address text-xs md:text-sm">107.174.34.44</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Hdun</span><span class="ip-address text-xs md:text-sm">109.204.188.135</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Interstellar</span><span class="ip-address text-xs md:text-sm">66.23.193.126</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Kasm 1</span><span class="ip-address text-xs md:text-sm">145.40.75.101</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Kasm 2</span><span class="ip-address text-xs md:text-sm">142.93.68.85</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Kasm 3</span><span class="ip-address text-xs md:text-sm">165.22.33.54</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Kazwire</span><span class="ip-address text-xs md:text-sm">209.222.97.244 / 103.195.102.132</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Light</span><span class="ip-address text-xs md:text-sm">104.243.45.193</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Lunaar</span><span class="ip-address text-xs md:text-sm">164.152.26.189</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Lunar</span><span class="ip-address text-xs md:text-sm">66.23.198.130</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Mocha</span><span class="ip-address text-xs md:text-sm">45.88.186.218</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Moonlight</span><span class="ip-address text-xs md:text-sm">172.93.104.11</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Nowgg.lol</span><span class="ip-address text-xs md:text-sm">152.53.80.35</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Onyx</span><span class="ip-address text-xs md:text-sm">172.67.158.114</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">PeteZah</span><span class="ip-address text-xs md:text-sm">62.72.3.251</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Plexile Arcade</span><span class="ip-address text-xs md:text-sm">104.243.41.121</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Polaris</span><span class="ip-address text-xs md:text-sm">172.67.176.33 / 104.21.48.25</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Pulsar</span><span class="ip-address text-xs md:text-sm">172.93.106.140</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Rammerhead</span><span class="ip-address text-xs md:text-sm">108.181.32.77 / 15.204.239.204</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Reds Exploit Corner</span><span class="ip-address text-xs md:text-sm">152.53.37.155</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Ruby</span><span class="ip-address text-xs md:text-sm">104.36.86.104</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Selenite</span><span class="ip-address text-xs md:text-sm">104.131.74.161</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Selenite</span><span class="ip-address text-xs md:text-sm">65.109.112.222</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Seraph</span><span class="ip-address text-xs md:text-sm">15.235.166.92</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Shadow</span><span class="ip-address text-xs md:text-sm">104.243.38.18</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Space</span><span class="ip-address text-xs md:text-sm">104.243.38.145</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Sunset</span><span class="ip-address text-xs md:text-sm">107.206.53.96 / 5.199.139.218</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Sunnys Gym</span><span class="ip-address text-xs md:text-sm">69.48.204.208</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Szvy Central</span><span class="ip-address text-xs md:text-sm">152.53.38.100</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">The Pizza Edition</span><span class="ip-address text-xs md:text-sm">104.36.84.31</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Tinfoil</span><span class="ip-address text-xs md:text-sm">129.213.65.72</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Typist</span><span class="ip-address text-xs md:text-sm">199.59.243.228</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">UniUB</span><span class="ip-address text-xs md:text-sm">104.243.42.228</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Utopia</span><span class="ip-address text-xs md:text-sm">132.145.197.109</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Velara</span><span class="ip-address text-xs md:text-sm">185.211.4.69</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Verwise</span><span class="ip-address text-xs md:text-sm">000.200.07.244 / 100.100.100.100</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Void Network</span><span class="ip-address text-xs md:text-sm">141.193.68.52 / 152.53.31.27</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Waves</span><span class="ip-address text-xs md:text-sm">172.96.142.25</span></div>
+                <div class="ip-item"><span class="ip-status text-xs md:text-sm">[ACTIVE]</span><span class="ip-name">Xenapsis/Ephraim</span><span class="ip-address text-xs md:text-sm">66.175.239.22</span></div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Script to dynamically color statuses -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const statusElements = document.querySelectorAll('.ip-status');
+            
+            statusElements.forEach(el => {
+                const text = el.textContent.trim().toLowerCase();
+                
+                // Clear any leftover color classes
+                el.classList.remove('text-green-400', 'text-red-500', 'text-yellow-400', 'text-gray-400');
+                
+                // Read text and apply matching color
+                if (text.includes('active')) {
+                    el.classList.add('text-green-400');
+                } else if (text.includes('stagnant')) {
+                    el.classList.add('text-red-500'); // Applies red
+                } else if (text.includes('slow')) {
+                    el.classList.add('text-yellow-400'); // Applies yellowish
+                } else {
+                    el.classList.add('text-gray-400'); // Default fallback
+                }
+            });
+        });
+    </script>
+
+    <!-- External Shared JavaScript link -->
+    <script src="../background.js"></script>
+</body>
+</html>

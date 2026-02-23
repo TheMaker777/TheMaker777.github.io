@@ -1,0 +1,76 @@
+/* style.css */
+body {
+    margin: 0;
+    overflow-x: hidden;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+}
+
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.content-wrapper {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+}
+
+.interactive {
+    pointer-events: auto;
+}
+
+h1 {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    letter-spacing: -2px;
+}
+
+.link-item {
+    position: relative;
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: #fff;
+}
+
+.link-item::before, .link-item::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.link-item::before { top: 0; left: 0; }
+.link-item::after { bottom: 0; right: 0; }
+
+.link-item:hover {
+    background-color: #fff;
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(255,255,255,0.5);
+}
+
+.link-item:hover::before {
+    top: -5px; left: -5px;
+    border-top-color: #fff; border-left-color: #fff;
+}
+
+.link-item:hover::after {
+    bottom: -5px; right: -5px;
+    border-bottom-color: #fff; border-right-color: #fff;
+}

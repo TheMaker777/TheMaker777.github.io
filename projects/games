@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UGS Files | TheMaker777</title>
+    <!-- Tailwind CSS for layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- External Shared CSS link -->
+    <link rel="stylesheet" href="../style.css">
+
+    <!-- Page-Specific Styles overriding the UGS default layout -->
+    <style>
+        body {
+            /* Force row layout for the sidebar */
+            display: flex;
+            align-items: flex-start;
+        }
+
+        /* Sidebar Theming */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0;
+            width: 80px; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            border-right: 1px solid #333;
+            padding: 20px 10px;
+            display: flex; flex-direction: column; gap: 8px;
+            overflow-y: auto; z-index: 1000;
+            pointer-events: auto; /* Ensure sidebar is clickable over canvas */
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: #000; }
+        .sidebar::-webkit-scrollbar-thumb { background: #555; }
+
+        /* Sidebar Buttons */
+        .sidebar-btn {
+            background: transparent;
+            border: 1px solid #333;
+            padding: 10px; font-size: 16px;
+            font-family: 'Space Mono', monospace;
+            cursor: pointer; color: white;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .sidebar-btn:hover:not(.empty) {
+            background: #fff;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .sidebar-btn.empty {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: transparent;
+        }
+
+        /* Main Content Alignment */
+        .main-content {
+            margin-left: 80px;
+            flex: 1; 
+            padding: 2rem;
+            z-index: 10; 
+            pointer-events: none; /* Let canvas interact with empty space */
+            min-height: 100vh;
+            width: calc(100% - 80px);
+        }
+
+        .interactive-area {
+            pointer-events: auto;
+        }
+
+        /* Injected Elements from external JS */
+        .letter-section { margin-bottom: 40px; }
+        
+        .letter-header {
+            color: #fff; font-size: 24px; font-weight: bold;
+            margin-bottom: 15px; padding-bottom: 5px;
+            border-bottom: 1px dashed #555;
+        }
+        
+        .buttons-container { display: flex; flex-direction: column; gap: 8px; }
+
+        .empty-message { color: #555; font-style: italic; padding: 10px 0; }
+
+        /* Grey Box Background for the Database Container */
+        #sections-container {
+            background: rgba(20, 20, 20, 0.85); /* Semi-transparent dark grey */
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Game Buttons */
+        input[type="button"] {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid #333;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-family: 'Space Mono', monospace;
+            cursor: pointer; color: #fff; text-align: left;
+            transition: all 0.2s ease;
+            width: 100%; max-width: 600px;
+        }
+
+        input[type="button"]:hover {
+            background: #fff; color: #000; 
+            border-color: #fff;
+            padding-left: 30px; /* Cool hover indent effect */
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .sidebar { width: 60px; padding: 15px 5px; }
+            .sidebar-btn { padding: 8px; font-size: 14px; }
+            .main-content { margin-left: 60px; width: calc(100% - 60px); padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Interactive Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Sidebar Navigation (Filled by external JS) -->
+    <div class="sidebar interactive-area" id="sidebar"></div>
+
+    <!-- Main Content -->
+    <div class="main-content pt-24 md:pt-32">
+        
+        <div class="w-full flex justify-start interactive-area mb-8 max-w-4xl mx-auto">
+            <a href="./index.html" class="link-item">
+                [ <- Return to Directory ]
+            </a>
+        </div>
+
+        <div class="interactive-area text-left max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">UGS_Files</h1>
+            <p class="text-gray-400 text-sm tracking-widest uppercase mb-8">Database / External_Archive</p>
+            
+            <!-- Links Section matching the aesthetic -->
+            <div class="mb-10 text-sm text-gray-400 space-y-2 border-l-2 border-gray-600 pl-4">
+                <p>Source_Doc: <a href="https://docs.google.com/document/d/1_FmH3BlSBQI7FGgAQL59-ZPe8eCxs35wel6JUyVaG8Q/" target="_blank" class="text-white hover:underline transition-colors">[ Ultimate Game Stash ]</a></p>
+                <p>Comms_Link: <a href="https://discord.gg/rmVsAqkpkA" target="_blank" class="text-white hover:underline transition-colors">[ Discord Server ]</a></p>
+                <div class="pt-2">
+                    <button id="lolbutton" onclick="const script = document.createElement('script');script.src = 'https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js';document.body.appendChild(script);" class="text-xs border border-gray-600 px-3 py-1.5 hover:bg-white hover:text-black transition-all">Force_Load_Database()</button>
+                </div>
+            </div>
+
+            <!-- Sections Container (Filled by external JS) -->
+            <div id="sections-container" class="mt-8"></div>
+        </div>
+    </div>
+
+    <!-- The original external script -->
+    <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js"></script>
+    
+    <!-- Script to hide the 'cl' prefix and capitalize from dynamically loaded buttons -->
+    <script>
+        const container = document.getElementById('sections-container');
+        
+        const cleanButtonValue = (btn) => {
+            if (btn.value) {
+                // Removes "cl" or "cl " from the very start of the button text (case-insensitive)
+                let cleanedText = btn.value.replace(/^cl\s*/i, '');
+                
+                // Capitalize the first letter
+                if (cleanedText.length > 0) {
+                    cleanedText = cleanedText.charAt(0).toUpperCase() + cleanedText.slice(1);
+                }
+                
+                btn.value = cleanedText;
+            }
+        };
+
+        // Clean any buttons that might have loaded instantly
+        document.querySelectorAll('#sections-container input[type="button"]').forEach(cleanButtonValue);
+
+        // Watch for buttons being added by the external script and clean them
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) { // Ensure it's an HTML element
+                        if (node.tagName === 'INPUT' && node.type === 'button') {
+                            cleanButtonValue(node);
+                        }
+                        // Check inside the added node for more buttons
+                        const buttons = node.querySelectorAll('input[type="button"]');
+                        buttons.forEach(cleanButtonValue);
+                    }
+                });
+            });
+        });
+
+        // Start watching the container
+        if (container) {
+            observer.observe(container, { childList: true, subtree: true });
+        }
+    </script>
+
+    <!-- External Shared JavaScript link -->
+    <script src="../background.js"></script>
+</body>
+</html>

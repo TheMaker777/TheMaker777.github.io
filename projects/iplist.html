@@ -34,7 +34,7 @@
             border: 1px solid #333;
             background: rgba(0, 0, 0, 0.6);
             transition: all 0.2s ease;
-            cursor: text;
+            cursor: pointer; /* Changed to pointer to show it's clickable */
         }
 
         .ip-item:hover {
@@ -64,6 +64,31 @@
         .interactive-area {
             pointer-events: auto;
         }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid #4ade80; /* Tailwind green-400 */
+            color: #4ade80;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.875rem;
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(1rem);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -86,11 +111,26 @@
         </div>
 
         <!-- URL Scanner Link Area -->
-        <div class="w-full interactive-area mb-10 border-l-2 border-gray-600 pl-4">
+        <div class="w-full interactive-area mb-8 border-l-2 border-gray-600 pl-4">
             <p class="text-gray-400 text-sm mb-3">External Analysis Tool:</p>
             <a href="https://urlscan.io/" target="_blank" class="link-item !border-gray-500 hover:!border-white inline-block">
                 [ Launch URL Scanner ]
             </a>
+        </div>
+
+        <!-- Instructions & Legend -->
+        <div class="w-full interactive-area mb-10 p-6 border border-gray-700 rounded-md bg-black bg-opacity-40 backdrop-blur-sm">
+            <h3 class="text-lg font-bold text-white mb-3">Standard Operating Procedure:</h3>
+            <ol class="list-decimal list-inside text-gray-300 text-sm mb-5 space-y-1">
+                <li>Click any row below to automatically copy its associated IP address.</li>
+                <li>Paste the copied IP into the URL Scanner linked above.</li>
+                <li>Scan the results for recently deployed links and test them.</li>
+            </ol>
+            <div class="flex flex-col md:flex-row gap-x-6 gap-y-2 text-xs border-t border-gray-800 pt-4">
+                <div class="flex items-center"><span class="text-green-400 font-bold tracking-widest mr-2">[ACTIVE]</span> <span class="text-gray-400">New links regularly.</span></div>
+                <div class="flex items-center"><span class="text-yellow-400 font-bold tracking-widest mr-2">[SLOW]</span> <span class="text-gray-400">New links occasionally.</span></div>
+                <div class="flex items-center"><span class="text-red-500 font-bold tracking-widest mr-2">[STAGNANT]</span> <span class="text-gray-400">Almost no links in the last year.</span></div>
+            </div>
         </div>
         
         <!-- IP List Container -->
@@ -172,9 +212,13 @@
         </div>
     </main>
 
-    <!-- Script to dynamically color statuses -->
+    <!-- Toast Notification Element -->
+    <div id="toast">IP Copied!</div>
+
+    <!-- Script to dynamically color statuses and handle copying -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Status Coloring Logic
             const statusElements = document.querySelectorAll('.ip-status');
             
             statusElements.forEach(el => {
@@ -194,6 +238,46 @@
                     el.classList.add('text-gray-400'); // Default fallback
                 }
             });
+
+            // Copy to Clipboard Logic
+            const ipItems = document.querySelectorAll('.ip-item');
+            const toast = document.getElementById('toast');
+            let toastTimeout;
+
+            ipItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const ipText = item.querySelector('.ip-address').textContent.trim();
+                    
+                    // Fallback mechanism for copying inside iframes
+                    const textArea = document.createElement("textarea");
+                    textArea.value = ipText;
+                    textArea.style.position = "absolute";
+                    textArea.style.left = "-999999px";
+                    document.body.prepend(textArea);
+                    textArea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        showToast(`Copied: ${ipText}`);
+                    } catch (error) {
+                        console.error('Copy failed', error);
+                        showToast('Failed to copy');
+                    } finally {
+                        textArea.remove();
+                    }
+                });
+            });
+
+            // Toast display function
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000); // Hides after 2 seconds
+            }
         });
     </script>
 

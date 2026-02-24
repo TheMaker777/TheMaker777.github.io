@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data URL Generator | TheMaker777</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- External Shared CSS link -->
+    <link rel="stylesheet" href="../style.css">
+
+    <style>
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(5px);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .interactive-area { pointer-events: auto; }
+        
+        textarea {
+            width: 100%; background: rgba(0,0,0,0.6); border: 1px solid #555; color: #4ade80;
+            padding: 0.75rem; font-family: 'Space Mono', monospace; min-height: 150px; resize: vertical;
+        }
+        
+        textarea:focus { outline: none; border-color: #4ade80; }
+
+        /* Different color for the output textarea */
+        textarea.output-area {
+            color: #60a5fa; /* blue-400 */
+            border-color: #3b82f6; /* blue-500 */
+            word-break: break-all;
+        }
+        textarea.output-area:focus { border-color: #60a5fa; }
+        
+        .action-btn {
+            display: block; width: 100%; padding: 0.75rem; border: 1px solid #4ade80;
+            color: #4ade80; background: rgba(74, 222, 128, 0.1); text-transform: uppercase;
+            font-weight: bold; cursor: pointer; transition: all 0.2s; margin-top: 1rem;
+        }
+        
+        .action-btn:hover:not(:disabled) { background: #4ade80; color: #000; }
+        .action-btn:disabled { border-color: #555; color: #555; cursor: not-allowed; background: transparent; }
+    </style>
+</head>
+<body>
+
+    <!-- Interactive Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Content -->
+    <main class="content-wrapper w-full max-w-4xl mx-auto pt-24 md:pt-32 pb-20 px-4">
+        
+        <div class="w-full flex justify-start interactive-area mb-8">
+            <a href="index.html" class="link-item">
+                [ <- Return to Directory ]
+            </a>
+        </div>
+
+        <div class="w-full text-left interactive-area mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Data_URL_Generator</h1>
+            <p class="text-gray-400 text-sm tracking-widest uppercase">HTML to URI Protocol</p>
+        </div>
+
+        <div class="glass-panel interactive-area">
+            <h2 class="text-xl font-bold mb-4 text-green-400 border-b border-gray-700 pb-2">/// ENCODE (String -> Base64 URI)</h2>
+            
+            <!-- Input Area -->
+            <div class="mb-6">
+                <label class="block text-xs text-gray-400 mb-2">[ 1. Input Raw HTML Payload ]</label>
+                <textarea id="html-input" placeholder="<html><body><h1>Hello World</h1></body></html>"></textarea>
+            </div>
+
+            <!-- Output Area -->
+            <div class="mb-4">
+                <label class="block text-xs text-gray-400 mb-2">[ 2. Generated Data URI ]</label>
+                <textarea id="url-output" class="output-area" readonly placeholder="Awaiting input..."></textarea>
+            </div>
+
+            <!-- Controls -->
+            <button id="btn-copy" class="action-btn" disabled>[ Copy to Clipboard ]</button>
+            <div id="status-message" class="mt-4 text-xs font-mono min-h-[20px]"></div>
+        </div>
+
+    </main>
+
+    <!-- The Encoder Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const htmlInput = document.getElementById('html-input');
+            const urlOutput = document.getElementById('url-output');
+            const btnCopy = document.getElementById('btn-copy');
+            const statusMessage = document.getElementById('status-message');
+
+            // Live-updating generation
+            htmlInput.addEventListener('input', () => {
+                const code = htmlInput.value;
+                
+                if (!code.trim()) {
+                    urlOutput.value = '';
+                    btnCopy.disabled = true;
+                    statusMessage.textContent = '';
+                    return;
+                }
+
+                try {
+                    const encodedHtml = encodeURIComponent(code);
+                    const dataUrl = 'data:text/html;charset=utf-8,' + encodedHtml;
+                    
+                    urlOutput.value = dataUrl;
+                    btnCopy.disabled = false;
+                    
+                    statusMessage.textContent = "URI generated successfully. Ready for extraction.";
+                    statusMessage.className = 'text-xs text-blue-400 font-mono mt-2 min-h-[20px]';
+                } catch (err) {
+                    statusMessage.textContent = "Error encoding payload: " + err.message;
+                    statusMessage.className = 'text-xs text-red-500 font-mono mt-2 min-h-[20px]';
+                }
+            });
+
+            // Copy to clipboard logic
+            btnCopy.addEventListener('click', () => {
+                if (btnCopy.disabled || !urlOutput.value) return;
+
+                // Select the text field
+                urlOutput.select();
+                urlOutput.setSelectionRange(0, 99999); // For mobile devices
+
+                // Copy the text inside the text field using execCommand (best for iFrames/Canvas)
+                document.execCommand('copy');
+                
+                // Deselect text so it looks cleaner
+                window.getSelection().removeAllRanges();
+
+                // Update status message instead of using annoying browser alert()
+                statusMessage.textContent = "Data URL copied to clipboard!";
+                statusMessage.className = 'text-xs text-green-400 font-mono mt-2 min-h-[20px]';
+            });
+        });
+    </script>
+
+    <!-- External Shared JavaScript link -->
+    <script src="../background.js"></script>
+</body>
+</html>

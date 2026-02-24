@@ -71,9 +71,19 @@
             </a>
         </div>
 
-        <div class="w-full text-left interactive-area mb-8">
+        <div class="w-full text-left interactive-area mb-6">
             <h1 class="text-4xl md:text-5xl font-bold mb-2">Steganography_Protocol</h1>
             <p class="text-gray-400 text-sm tracking-widest uppercase">LSB Data Injection Engine</p>
+        </div>
+
+        <!-- Warning Banner -->
+        <div class="w-full interactive-area mb-8">
+            <div class="border-l-4 border-yellow-500 bg-yellow-900/20 p-4 shadow-lg">
+                <p class="text-yellow-400 text-sm font-mono">
+                    <strong class="font-bold">/// WARNING: FORMAT CORRUPTION RISK</strong><br>
+                    This protocol relies on microscopic pixel manipulation. The injected image is generated as a <b>.PNG</b> file. Do NOT convert it to <b>.JPEG</b> or send it through platforms that compress images (like certain chat apps), as lossy compression will permanently destroy the hidden payload.
+                </p>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 interactive-area">

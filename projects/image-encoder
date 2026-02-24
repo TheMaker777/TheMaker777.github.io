@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography Protocol | TheMaker777</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- External Shared CSS link -->
+    <link rel="stylesheet" href="../style.css">
+
+    <style>
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(5px);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .interactive-area { pointer-events: auto; }
+        
+        canvas.preview { 
+            max-width: 100%; height: auto; margin-top: 1rem; 
+            border: 1px dashed #555; display: none; 
+        }
+        
+        input[type="file"] { display: none; }
+        
+        .file-btn {
+            display: inline-block; padding: 0.5rem 1rem; border: 1px solid #555; cursor: pointer;
+            transition: all 0.2s; font-size: 0.875rem; text-transform: uppercase;
+        }
+        
+        .file-btn:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+        
+        textarea {
+            width: 100%; background: rgba(0,0,0,0.6); border: 1px solid #555; color: #4ade80;
+            padding: 0.75rem; font-family: 'Space Mono', monospace; min-height: 100px; resize: vertical;
+        }
+        
+        textarea:focus { outline: none; border-color: #4ade80; }
+        
+        .action-btn {
+            display: block; width: 100%; padding: 0.75rem; border: 1px solid #4ade80;
+            color: #4ade80; background: rgba(74, 222, 128, 0.1); text-transform: uppercase;
+            font-weight: bold; cursor: pointer; transition: all 0.2s; margin-top: 1rem;
+        }
+        
+        .action-btn:hover:not(:disabled) { background: #4ade80; color: #000; }
+        .action-btn:disabled { border-color: #555; color: #555; cursor: not-allowed; background: transparent; }
+    </style>
+</head>
+<body>
+
+    <!-- Interactive Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Content -->
+    <main class="content-wrapper w-full max-w-6xl mx-auto pt-24 md:pt-32 pb-20 px-4">
+        
+        <div class="w-full flex justify-start interactive-area mb-8">
+            <a href="../index.html" class="link-item">
+                [ <- Return to Directory ]
+            </a>
+        </div>
+
+        <div class="w-full text-left interactive-area mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Steganography_Protocol</h1>
+            <p class="text-gray-400 text-sm tracking-widest uppercase">LSB Data Injection Engine</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 interactive-area">
+            
+            <!-- ENCODE PANEL -->
+            <div class="glass-panel">
+                <h2 class="text-xl font-bold mb-4 text-green-400 border-b border-gray-700 pb-2">/// ENCODE (Hide Data)</h2>
+                
+                <div class="mb-4">
+                    <label class="file-btn w-full text-center block" id="encode-label">
+                        <input type="file" id="encode-input" accept="image/png, image/jpeg">
+                        [ 1. Select Base Image ]
+                    </label>
+                    <canvas id="encode-canvas" class="preview"></canvas>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs text-gray-400 mb-2">2. Enter Secret Payload:</label>
+                    <textarea id="secret-message" placeholder="Type the secret message here..."></textarea>
+                </div>
+
+                <button id="btn-encode" class="action-btn" disabled>[ 3. Inject Payload ]</button>
+                <div id="encode-status" class="mt-4 text-xs font-mono min-h-[20px]"></div>
+                
+                <a id="download-link" class="file-btn w-full text-center mt-4 !text-blue-400 !border-blue-400 hidden hover:!bg-blue-900/30">
+                    [ Download Injected Image ]
+                </a>
+            </div>
+
+            <!-- DECODE PANEL -->
+            <div class="glass-panel">
+                <h2 class="text-xl font-bold mb-4 text-blue-400 border-b border-gray-700 pb-2">/// DECODE (Extract Data)</h2>
+                
+                <div class="mb-4">
+                    <label class="file-btn w-full text-center block" id="decode-label">
+                        <input type="file" id="decode-input" accept="image/png">
+                        [ 1. Select Injected Image (.png) ]
+                    </label>
+                    <canvas id="decode-canvas" class="preview"></canvas>
+                </div>
+
+                <button id="btn-decode" class="action-btn" disabled>[ 2. Extract Payload ]</button>
+                <div id="decode-status" class="mt-4 text-xs font-mono min-h-[20px]"></div>
+
+                <div class="mt-4">
+                    <label class="block text-xs text-gray-400 mb-2">Extracted Data:</label>
+                    <textarea id="output-message" readonly placeholder="Awaiting extraction..."></textarea>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- The Actual Math/Steganography Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // A special tag we inject at the end of the message so the decoder knows when to stop reading
+            const END_DELIMITER = ':::END:::';
+
+            // --- HELPER FUNCTIONS ---
+            
+            // Convert a normal text string into a massive string of 1s and 0s
+            function strToBinary(str) {
+                return str.split('').map(char => {
+                    return char.charCodeAt(0).toString(2).padStart(8, '0');
+                }).join('');
+            }
+
+            // Convert a massive string of 1s and 0s back into normal text
+            function binaryToStr(bin) {
+                let str = '';
+                for (let i = 0; i < bin.length; i += 8) {
+                    let byte = bin.slice(i, i + 8);
+                    if(byte.length === 8) {
+                        str += String.fromCharCode(parseInt(byte, 2));
+                    }
+                }
+                return str;
+            }
+
+            // --- HTML ELEMENT GRABS ---
+            
+            const encodeInput = document.getElementById('encode-input');
+            const encodeLabel = document.getElementById('encode-label');
+            const encodeCanvas = document.getElementById('encode-canvas');
+            const encodeCtx = encodeCanvas.getContext('2d', { willReadFrequently: true });
+            const secretMessage = document.getElementById('secret-message');
+            const btnEncode = document.getElementById('btn-encode');
+            const encodeStatus = document.getElementById('encode-status');
+            const downloadLink = document.getElementById('download-link');
+
+            const decodeInput = document.getElementById('decode-input');
+            const decodeLabel = document.getElementById('decode-label');
+            const decodeCanvas = document.getElementById('decode-canvas');
+            const decodeCtx = decodeCanvas.getContext('2d', { willReadFrequently: true });
+            const btnDecode = document.getElementById('btn-decode');
+            const decodeStatus = document.getElementById('decode-status');
+            const outputMessage = document.getElementById('output-message');
+
+            let baseImageLoaded = false;
+
+            // --- ENCODE LOGIC ---
+
+            // 1. User uploads the image they want to hide things inside
+            encodeInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                encodeLabel.innerHTML = `[ Selected: ${file.name} ]`;
+                const reader = new FileReader();
+                
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Draw the uploaded image onto the invisible HTML canvas
+                        encodeCanvas.width = img.width;
+                        encodeCanvas.height = img.height;
+                        encodeCtx.drawImage(img, 0, 0);
+                        encodeCanvas.style.display = 'block';
+                        baseImageLoaded = true;
+                        
+                        btnEncode.disabled = false;
+                        downloadLink.style.display = 'none';
+                        encodeStatus.textContent = "Image loaded. Ready for injection.";
+                        encodeStatus.className = 'text-xs text-blue-400 font-mono min-h-[20px]';
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // 2. User clicks "Inject Payload"
+            btnEncode.addEventListener('click', () => {
+                if (!baseImageLoaded) return;
+
+                const msg = secretMessage.value;
+                if (!msg) {
+                    encodeStatus.textContent = "Error: Secret payload is empty.";
+                    encodeStatus.className = 'text-xs text-red-500 font-mono min-h-[20px]';
+                    return;
+                }
+
+                encodeStatus.textContent = "Injecting data...";
+                encodeStatus.className = 'text-xs text-yellow-400 font-mono min-h-[20px]';
+
+                setTimeout(() => {
+                    try {
+                        const fullMsg = msg + END_DELIMITER;
+                        const binMsg = strToBinary(fullMsg);
+                        
+                        // Grab the raw RGBA pixel data from the canvas
+                        const imageData = encodeCtx.getImageData(0, 0, encodeCanvas.width, encodeCanvas.height);
+                        const data = imageData.data;
+
+                        // Check if the image is big enough to hold the message
+                        let availableBits = (data.length / 4) * 3; 
+                        if (binMsg.length > availableBits) {
+                            throw new Error(`Payload too large. Max: ${Math.floor(availableBits/8)} chars.`);
+                        }
+
+                        let bitIndex = 0;
+                        
+                        // Loop through every single pixel's color data
+                        for (let i = 0; i < data.length; i++) {
+                            if (bitIndex >= binMsg.length) break; // Stop when message is hidden
+                            
+                            // Skip the alpha channel (transparency) so the image doesn't look weird
+                            if ((i + 1) % 4 === 0) continue;
+                            
+                            // Grab the bit we want to hide (0 or 1)
+                            let bit = parseInt(binMsg[bitIndex]);
+                            
+                            // Change the last binary digit of the pixel's color to match our message
+                            data[i] = (data[i] & 254) | bit;
+                            bitIndex++;
+                        }
+
+                        // Put the modified pixels back onto the canvas
+                        encodeCtx.putImageData(imageData, 0, 0);
+
+                        // Turn the canvas back into a downloadable PNG file
+                        encodeCanvas.toBlob((blob) => {
+                            const url = URL.createObjectURL(blob);
+                            downloadLink.href = url;
+                            downloadLink.download = 'encoded_payload.png';
+                            downloadLink.style.display = 'inline-block';
+                            
+                            encodeStatus.textContent = "Injection complete. Payload ready for download.";
+                            encodeStatus.className = 'text-xs text-green-400 font-mono min-h-[20px]';
+                        }, 'image/png');
+
+                    } catch (error) {
+                        encodeStatus.textContent = "Error: " + error.message;
+                        encodeStatus.className = 'text-xs text-red-500 font-mono min-h-[20px]';
+                    }
+                }, 500);
+            });
+
+            // --- DECODE LOGIC ---
+
+            let payloadLoaded = false;
+
+            // 1. User uploads an image that (hopefully) has data hidden in it
+            decodeInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                decodeLabel.innerHTML = `[ Selected: ${file.name} ]`;
+                const reader = new FileReader();
+                
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        decodeCanvas.width = img.width;
+                        decodeCanvas.height = img.height;
+                        decodeCtx.drawImage(img, 0, 0);
+                        decodeCanvas.style.display = 'block';
+                        payloadLoaded = true;
+                        
+                        decodeStatus.textContent = "Payload loaded. Ready for extraction.";
+                        decodeStatus.className = 'text-xs text-blue-400 font-mono min-h-[20px]';
+                        btnDecode.disabled = false;
+                        outputMessage.value = '';
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // 2. User clicks extract
+            btnDecode.addEventListener('click', () => {
+                if (!payloadLoaded) return;
+
+                decodeStatus.textContent = "Extracting data...";
+                decodeStatus.className = 'text-xs text-yellow-400 font-mono min-h-[20px]';
+                outputMessage.value = '';
+
+                setTimeout(() => {
+                    try {
+                        // Rip the raw pixel data from the image
+                        const imageData = decodeCtx.getImageData(0, 0, decodeCanvas.width, decodeCanvas.height);
+                        const data = imageData.data;
+                        
+                        let binaryMsg = '';
+                        
+                        for (let i = 0; i < data.length; i++) {
+                            // Skip alpha channel
+                            if ((i + 1) % 4 === 0) continue;
+                            
+                            // Extract just the very last binary digit of every pixel
+                            binaryMsg += (data[i] & 1).toString();
+                        }
+
+                        // Convert massive string of 1s and 0s back to normal text
+                        const extractedText = binaryToStr(binaryMsg);
+                        
+                        // Look for our specific stopping tag
+                        const endIndex = extractedText.indexOf(END_DELIMITER);
+                        
+                        if (endIndex !== -1) {
+                            outputMessage.value = extractedText.substring(0, endIndex);
+                            decodeStatus.textContent = "Extraction successful.";
+                            decodeStatus.className = 'text-xs text-green-400 font-mono min-h-[20px]';
+                        } else {
+                            outputMessage.value = "ERROR: No valid data found. The image might not contain a payload, or it was corrupted/compressed.";
+                            decodeStatus.textContent = "Extraction failed.";
+                            decodeStatus.className = 'text-xs text-red-500 font-mono min-h-[20px]';
+                        }
+                    } catch (error) {
+                        decodeStatus.textContent = "Error: " + error.message;
+                        decodeStatus.className = 'text-xs text-red-500 font-mono min-h-[20px]';
+                    }
+                }, 500);
+            });
+
+        });
+    </script>
+
+    <!-- External Shared JavaScript link -->
+    <script src="../background.js"></script>
+</body>
+</html>

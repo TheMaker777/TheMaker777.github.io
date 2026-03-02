@@ -1,1 +1,385 @@
-one sec bro
+<!-- ═══════════════════════════════════════════════════════
+     CHATBOT SNIPPET — paste into your index.html
+     Uses your existing glass-panel, action-btn, textarea styles
+     ══════════════════════════════════════════════════════ -->
+
+<!-- 1. Extra styles — paste inside your <head>
+     (only the chatbot-specific bits not already in your style.css) -->
+<style>
+  .chat-log {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #555;
+    color: #4ade80;
+    padding: 0.75rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    height: 220px;
+    overflow-y: auto;
+    resize: vertical;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+  }
+
+  .chat-log::-webkit-scrollbar { 
+    width: 3px; 
+  }
+  
+  .chat-log::-webkit-scrollbar-thumb { 
+    background: #333; 
+  }
+
+  .chat-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-size: 0.7rem;
+    text-align: center;
+    line-height: 2;
+  }
+  
+  .chat-empty-sub {
+    font-size: 0.6rem;
+    color: #555;
+  }
+
+  .cmsg { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 2px; 
+    animation: cmsgIn 0.15s ease-out; 
+  }
+
+  @keyframes cmsgIn { 
+    from { opacity: 0; transform: translateY(3px); } 
+    to { opacity: 1; transform: translateY(0); } 
+  }
+
+  .cmsg-who { 
+    font-size: 0.6rem; 
+    text-transform: uppercase; 
+    letter-spacing: 0.08em; 
+  }
+  
+  .cmsg.user .cmsg-who { color: #555; }
+  .cmsg.bot .cmsg-who { color: #4ade80; }
+
+  .cmsg-text { 
+    font-size: 0.75rem; 
+    line-height: 1.7; 
+    word-break: break-word; 
+    color: #ccc; 
+  }
+  
+  .cmsg.user .cmsg-text { color: #888; }
+
+  .cmsg-text code {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #333;
+    padding: 1px 5px;
+    font-size: 0.7rem;
+    color: #4ade80;
+  }
+
+  .ctyping { 
+    display: flex; 
+    gap: 5px; 
+    align-items: center; 
+    padding: 3px 0; 
+  }
+
+  .ctyping-dot { 
+    width: 5px; 
+    height: 5px; 
+    border-radius: 50%; 
+    background: #4ade80; 
+    animation: ctdot 1.1s ease-in-out infinite; 
+  }
+  
+  .ctyping-dot:nth-child(2) { animation-delay: 0.18s; }
+  .ctyping-dot:nth-child(3) { animation-delay: 0.36s; }
+
+  @keyframes ctdot { 
+    0%, 60%, 100% { opacity: .2; transform: translateY(0); } 
+    30% { opacity: 1; transform: translateY(-4px); } 
+  }
+
+  .chat-chips {
+    display: flex; 
+    gap: 6px; 
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+
+  .chat-chip {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border: 1px solid #555;
+    color: #555;
+    background: transparent;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .chat-chip:hover { 
+    border-color: #fff; 
+    color: #fff; 
+    background: rgba(255, 255, 255, 0.05); 
+  }
+
+  .chat-input-row {
+    display: flex;
+    gap: 0;
+    margin-top: 0.75rem;
+  }
+
+  /* Override textarea defaults for the chat input only */
+  .chat-input-row textarea {
+    min-height: unset;
+    height: 42px;
+    resize: none;
+    border: 1px solid #555;
+    border-right: none;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ccc;
+    font-size: 0.8rem;
+    padding: 0.6rem 0.75rem;
+    flex: 1;
+    font-family: 'Space Mono', monospace;
+    outline: none;
+  }
+
+  .chat-input-row textarea:focus { border-color: #4ade80; }
+  .chat-input-row textarea::placeholder { color: #555; }
+
+  .chat-send-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 0 1rem;
+    border: 1px solid #4ade80;
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    outline: none;
+  }
+
+  .chat-send-btn:hover:not(:disabled) { 
+    background: #4ade80; 
+    color: #000; 
+  }
+  
+  .chat-send-btn:disabled { 
+    border-color: #555; 
+    color: #555; 
+    cursor: not-allowed; 
+    background: transparent; 
+  }
+
+  .chat-err {
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+    color: #ef4444;
+    font-family: 'Space Mono', monospace;
+    display: none;
+  }
+
+  .chat-foot {
+    margin-top: 0.75rem;
+    font-size: 0.58rem;
+    color: #555;
+    font-family: 'Space Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .chat-status-dot {
+    display: inline-block; 
+    width: 5px; 
+    height: 5px;
+    border-radius: 50%; 
+    background: #4ade80;
+    margin-right: 5px; 
+    vertical-align: middle;
+    animation: cspulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes cspulse { 
+    0%, 100% { opacity: 1; } 
+    50% { opacity: 0.2; } 
+  }
+</style>
+
+
+<!-- 2. Widget HTML — paste wherever you want it in <body> -->
+<div class="glass-panel interactive-area">
+  <h2 class="text-xl font-bold mb-4 text-green-400 border-b border-gray-700 pb-2">/// ASK ME ANYTHING</h2>
+
+  <div class="chat-log" id="chatLog">
+    <div class="chat-empty" id="chatEmpty">
+      <span>> waiting for input_</span>
+      <span class="chat-empty-sub">ask about projects, skills, or experience</span>
+    </div>
+  </div>
+
+  <div class="chat-chips">
+    <button class="chat-chip" onclick="fillPrompt(this)">what do you build?</button>
+    <button class="chat-chip" onclick="fillPrompt(this)">your stack?</button>
+    <button class="chat-chip" onclick="fillPrompt(this)">open to work?</button>
+    <button class="chat-chip" onclick="fillPrompt(this)">latest projects?</button>
+  </div>
+
+  <div class="chat-input-row">
+    <textarea id="chatInput" placeholder="type a message..." autocomplete="off" spellcheck="false"></textarea>
+    <button class="chat-send-btn" id="chatSendBtn" onclick="sendMessage()">[ Send ]</button>
+  </div>
+
+  <div class="chat-err" id="chatErr"></div>
+
+  <div class="chat-foot">
+    <span><span class="chat-status-dot"></span>groq · llama-3.3-70b</span>
+    <span>free tier · ~14k req/day</span>
+  </div>
+</div>
+
+
+<!-- 3. Script — paste before </body> (after background.js) -->
+<script>
+  // ── CONFIG ──────────────────────────────────────────────
+  const WORKER_URL = 'https://YOUR_WORKER.YOUR_USERNAME.workers.dev';
+
+  const SYSTEM_PROMPT = `You are an AI assistant on TheMaker777's developer portfolio.
+Be concise, sharp, and friendly. Answer questions about their projects, skills,
+and experience. Keep replies to 2-3 sentences unless asked to elaborate.
+If you don't know something specific, say so and suggest checking the GitHub.`;
+  // ────────────────────────────────────────────────────────
+
+  const chatHistory = [];
+  const chatLog     = document.getElementById('chatLog');
+  const chatInput   = document.getElementById('chatInput');
+  const chatSendBtn = document.getElementById('chatSendBtn');
+  const chatErr     = document.getElementById('chatErr');
+
+  // Handle Enter key for sending messages
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { 
+      e.preventDefault(); 
+      sendMessage(); 
+    }
+  });
+
+  // Populate input from suggestion chips
+  function fillPrompt(chip) {
+    chatInput.value = chip.textContent.trim();
+    chatInput.focus();
+  }
+
+  // Append a message to the chat log
+  function addMsg(role, text) {
+    document.getElementById('chatEmpty')?.remove();
+    
+    const el = document.createElement('div');
+    el.className = `cmsg ${role}`;
+    el.innerHTML = `
+      <span class="cmsg-who">> ${role === 'user' ? 'you' : 'assistant'}</span>
+      <div class="cmsg-text">${chatFmt(text)}</div>
+    `;
+    
+    chatLog.appendChild(el);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  // Show the animated typing indicator
+  function addTyping() {
+    document.getElementById('chatEmpty')?.remove();
+    
+    const el = document.createElement('div');
+    el.className = 'cmsg bot'; 
+    el.id = 'chatTyping';
+    el.innerHTML = `
+      <span class="cmsg-who">> assistant</span>
+      <div class="ctyping">
+        <div class="ctyping-dot"></div>
+        <div class="ctyping-dot"></div>
+        <div class="ctyping-dot"></div>
+      </div>
+    `;
+    
+    chatLog.appendChild(el);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  // Format the text to handle basic HTML escaping and markdown code blocks
+  function chatFmt(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\n/g, '<br>');
+  }
+
+  // Display error messages
+  function showChatErr(msg) {
+    chatErr.textContent = '> error: ' + msg;
+    chatErr.style.display = 'block';
+    setTimeout(() => {
+      chatErr.style.display = 'none';
+    }, 5000);
+  }
+
+  // Handle the message sending logic
+  async function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text || chatSendBtn.disabled) return;
+
+    chatInput.value = '';
+    chatSendBtn.disabled = true;
+    chatErr.style.display = 'none';
+
+    addMsg('user', text);
+    chatHistory.push({ role: 'user', content: text });
+    addTyping();
+
+    try {
+      const res = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          messages: chatHistory, 
+          system: SYSTEM_PROMPT 
+        }),
+      });
+      
+      const data = await res.json();
+      document.getElementById('chatTyping')?.remove();
+
+      if (!res.ok || data.error) {
+        showChatErr(data.error || `status ${res.status}`);
+        chatHistory.pop();
+      } else {
+        addMsg('bot', data.reply);
+        chatHistory.push({ role: 'assistant', content: data.reply });
+      }
+    } catch (err) {
+      document.getElementById('chatTyping')?.remove();
+      showChatErr('could not reach worker — check WORKER_URL');
+      chatHistory.pop();
+    }
+
+    chatSendBtn.disabled = false;
+    chatInput.focus();
+  }
+</script>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Archiver V2 | TheMaker777</title>
+  
+  <!-- External Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Your Global Project CSS -->
+  <link rel="stylesheet" href="../css/style.css">
+
+  <!-- Archiver Specific Styles -->
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      overflow-x: hidden;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* --- Archiver UI Styles --- */
+    .archiver-input-group {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1rem;
+    }
+
+    .archiver-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #555;
+      border-right: none;
+      color: #4ade80;
+      padding: 0.75rem 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .archiver-input:focus {
+      border-color: #4ade80;
+    }
+
+    .archiver-input::placeholder {
+      color: #555;
+    }
+
+    .archiver-btn {
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid #4ade80;
+      color: #4ade80;
+      padding: 0 1.5rem;
+      font-family: 'Space Mono', monospace;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .archiver-btn:hover:not(:disabled) {
+      background: #4ade80;
+      color: #000;
+    }
+
+    .archiver-btn:disabled {
+      border-color: #555;
+      color: #555;
+      background: transparent;
+      cursor: not-allowed;
+    }
+
+    /* Toggles */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hacker-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: #aaa;
+      cursor: pointer;
+    }
+
+    .hacker-toggle input {
+      display: none;
+    }
+
+    .toggle-box {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #555;
+      display: inline-block;
+      position: relative;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .hacker-toggle input:checked + .toggle-box {
+      border-color: #4ade80;
+    }
+
+    .hacker-toggle input:checked + .toggle-box::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 8px;
+      height: 8px;
+      background: #4ade80;
+    }
+
+    .hacker-toggle input:checked ~ span {
+      color: #4ade80;
+    }
+
+    /* Terminal Output */
+    .terminal-window {
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid #333;
+      border-top: 1px solid #555;
+      height: 200px;
+      overflow-y: auto;
+      padding: 1rem;
+      font-size: 0.7rem;
+      color: #ccc;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      scrollbar-width: thin;
+      scrollbar-color: #4ade80 transparent;
+      margin-bottom: 1.5rem;
+    }
+
+    .terminal-window::-webkit-scrollbar { width: 4px; }
+    .terminal-window::-webkit-scrollbar-thumb { background: #4ade80; }
+
+    .term-line {
+      line-height: 1.4;
+      word-break: break-all;
+    }
+
+    .term-time { color: #555; margin-right: 0.5rem; }
+    .term-info { color: #60a5fa; }
+    .term-success { color: #4ade80; }
+    .term-error { color: #ef4444; }
+    .term-warn { color: #fbbf24; }
+
+    /* History List */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      border: 1px solid #333;
+      background: rgba(0,0,0,0.4);
+      font-size: 0.75rem;
+      transition: border-color 0.2s;
+    }
+
+    .history-item:hover {
+      border-color: #555;
+    }
+
+    .history-link {
+      color: #4ade80;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 60%;
+    }
+
+    .history-link:hover {
+      text-decoration: underline;
+    }
+
+    .history-actions a {
+      color: #aaa;
+      text-decoration: none;
+      margin-left: 0.5rem;
+      padding: 2px 6px;
+      border: 1px solid #333;
+    }
+
+    .history-actions a:hover {
+      color: #fff;
+      border-color: #fff;
+    }
+
+    .blinking-cursor {
+      display: inline-block;
+      width: 6px;
+      height: 12px;
+      background: #4ade80;
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+  </style>
+</head>
+<body class="antialiased min-h-screen relative flex flex-col selection:bg-green-400 selection:text-black">
+
+  <!-- Interactive Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Main Content Container -->
+  <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4 sm:p-8">
+    
+    <!-- Navigation / Back Button -->
+    <div class="w-full max-w-4xl mb-6">
+      <a href="../index.html" class="inline-flex items-center text-sm text-gray-400 hover:text-green-400 transition-colors duration-200 uppercase tracking-widest">
+        <span class="mr-2">←</span> Back to Portfolio
+      </a>
+    </div>
+
+    <!-- Archiver Widget / Glass Panel -->
+    <div class="glass-panel interactive-area w-full max-w-4xl p-6 md:p-8 rounded-xl backdrop-blur-md bg-black/40 border border-gray-800 shadow-2xl">
+      
+      <div class="flex justify-between items-end border-b border-gray-700 pb-2 mb-6">
+        <h2 class="text-xl font-bold text-green-400 tracking-widest uppercase">/// Web_Archiver v2.0</h2>
+        <span class="text-xs text-gray-500 font-mono">Status: <span class="text-green-400">ONLINE</span></span>
+      </div>
+
+      <!-- Input Section -->
+      <div class="archiver-input-group">
+        <input type="url" id="urlInput" class="archiver-input" placeholder="https://example.com/article-to-save" autocomplete="off">
+        <button id="archiveBtn" class="archiver-btn" onclick="startArchive()">[ INITIALIZE ]</button>
+      </div>
+
+      <!-- Options Section -->
+      <div class="options-grid">
+        <label class="hacker-toggle">
+          <input type="checkbox" id="optHtml" checked disabled>
+          <div class="toggle-box"></div>
+          <span>Save HTML</span>
+        </label>
+        <label class="hacker-toggle">
+          <input type="checkbox" id="optScreenshot" checked>
+          <div class="toggle-box"></div>
+          <span>Screenshot (PNG)</span>
+        </label>
+        <label class="hacker-toggle">
+          <input type="checkbox" id="optPdf">
+          <div class="toggle-box"></div>
+          <span>Export PDF</span>
+        </label>
+        <label class="hacker-toggle">
+          <input type="checkbox" id="optBypass">
+          <div class="toggle-box"></div>
+          <span>JS Bypass</span>
+        </label>
+      </div>
+
+      <!-- Terminal Output -->
+      <div class="terminal-window" id="terminal">
+        <div class="term-line"><span class="term-time">[SYS]</span> Web Archiver initialized. Waiting for target URL...<span id="termCursor" class="blinking-cursor"></span></div>
+      </div>
+
+      <!-- Session History -->
+      <div class="mt-4">
+        <h3 class="text-xs text-gray-500 uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Session Archives</h3>
+        <div class="history-list" id="historyList">
+          <div class="text-xs text-gray-600 italic py-2">No items archived in this session yet.</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- External Background Script -->
+  <script src="../js/background.js"></script>
+
+  <!-- Archiver Logic Script -->
+  <script>
+    // ── CONFIG ──────────────────────────────────────────────
+    // Replace this with your actual Cloudflare Worker or backend endpoint
+    const ARCHIVER_API_URL = 'https://YOUR_WORKER.YOUR_USERNAME.workers.dev/archive';
+    // ────────────────────────────────────────────────────────
+
+    const urlInput = document.getElementById('urlInput');
+    const archiveBtn = document.getElementById('archiveBtn');
+    const terminal = document.getElementById('terminal');
+    const historyList = document.getElementById('historyList');
+    
+    let isArchiving = false;
+    let archiveHistory = [];
+
+    // Handle Enter key
+    urlInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        startArchive();
+      }
+    });
+
+    function getTimestamp() {
+      const now = new Date();
+      return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    }
+
+    function logTerminal(msg, type = 'info') {
+      // Remove cursor from previous last line
+      const cursor = document.getElementById('termCursor');
+      if (cursor) cursor.remove();
+
+      const line = document.createElement('div');
+      line.className = 'term-line';
+      
+      let typeClass = 'term-info';
+      let typeTag = '[NFO]';
+      if (type === 'success') { typeClass = 'term-success'; typeTag = '[OK!]'; }
+      if (type === 'error') { typeClass = 'term-error'; typeTag = '[ERR]'; }
+      if (type === 'warn') { typeClass = 'term-warn'; typeTag = '[WRN]'; }
+      if (type === 'sys') { typeClass = 'term-time'; typeTag = '[SYS]'; }
+
+      line.innerHTML = `<span class="term-time">${getTimestamp()}</span> <span class="${typeClass}">${typeTag}</span> ${msg}<span id="termCursor" class="blinking-cursor"></span>`;
+      
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function isValidUrl(string) {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    async function startArchive() {
+      if (isArchiving) return;
+      
+      const targetUrl = urlInput.value.trim();
+      
+      if (!targetUrl) {
+        logTerminal('Target URL cannot be empty.', 'error');
+        return;
+      }
+      
+      let finalUrl = targetUrl;
+      if (!/^https?:\/\//i.test(finalUrl)) {
+        finalUrl = 'https://' + finalUrl;
+        urlInput.value = finalUrl;
+      }
+
+      if (!isValidUrl(finalUrl)) {
+        logTerminal('Invalid URL format detected.', 'error');
+        return;
+      }
+
+      // Gather options
+      const opts = {
+        screenshot: document.getElementById('optScreenshot').checked,
+        pdf: document.getElementById('optPdf').checked,
+        jsBypass: document.getElementById('optBypass').checked
+      };
+
+      // Lock UI
+      isArchiving = true;
+      archiveBtn.disabled = true;
+      archiveBtn.textContent = '[ PROCESSING... ]';
+      urlInput.disabled = true;
+
+      logTerminal(`----------------------------------------`, 'sys');
+      logTerminal(`Initializing archive sequence for: ${finalUrl}`, 'info');
+      logTerminal(`Options config: HTML=true, PNG=${opts.screenshot}, PDF=${opts.pdf}, JS_BYPASS=${opts.jsBypass}`, 'info');
+
+      try {
+        // --- SIMULATED BACKEND PROCESS ---
+        // In a real scenario, you would do a fetch() to your worker here.
+        // const res = await fetch(ARCHIVER_API_URL, { method: 'POST', body: JSON.stringify({ url: finalUrl, ...opts }) });
+        // const data = await res.json();
+        
+        // Simulating the steps for visual feedback
+        await mockDelay(800);
+        logTerminal('Resolving DNS and establishing connection...', 'info');
+        
+        await mockDelay(1200);
+        logTerminal('Fetching DOM footprint and static assets...', 'info');
+        
+        if (opts.jsBypass) {
+          await mockDelay(1500);
+          logTerminal('Executing JS bypass sequence (Puppeteer instance headless)...', 'warn');
+        }
+
+        await mockDelay(1000);
+        logTerminal('Serializing HTML payload...', 'info');
+
+        if (opts.screenshot) {
+          await mockDelay(1500);
+          logTerminal('Rendering viewport and capturing PNG screenshot...', 'info');
+        }
+
+        if (opts.pdf) {
+          await mockDelay(2000);
+          logTerminal('Compiling layout to PDF format...', 'info');
+        }
+
+        await mockDelay(1000);
+        logTerminal('Uploading blobs to R2 storage bucket...', 'info');
+
+        await mockDelay(800);
+        
+        // Simulated successful response
+        const fakeResponse = {
+          id: Math.random().toString(36).substr(2, 9),
+          url: finalUrl,
+          archiveUrl: `https://archive.themaker777.com/${Math.random().toString(36).substr(2, 6)}`
+        };
+
+        logTerminal(`Archive successful. ID: ${fakeResponse.id}`, 'success');
+        
+        // Add to history
+        addHistoryItem(fakeResponse);
+
+      } catch (err) {
+        logTerminal(`Fatal error during archiving: ${err.message}`, 'error');
+      } finally {
+        // Unlock UI
+        isArchiving = false;
+        archiveBtn.disabled = false;
+        archiveBtn.textContent = '[ INITIALIZE ]';
+        urlInput.disabled = false;
+        urlInput.value = '';
+        urlInput.focus();
+      }
+    }
+
+    function addHistoryItem(data) {
+      if (archiveHistory.length === 0) {
+        historyList.innerHTML = ''; // clear empty message
+      }
+
+      archiveHistory.unshift(data); // add to beginning
+
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = `
+        <a href="${data.url}" target="_blank" class="history-link" title="${data.url}">${data.url}</a>
+        <div class="history-actions">
+          <a href="${data.archiveUrl}" target="_blank" title="View Archive">HTML</a>
+          <a href="${data.archiveUrl}.png" target="_blank" title="View Screenshot">PNG</a>
+        </div>
+      `;
+      
+      historyList.insertBefore(item, historyList.firstChild);
+    }
+
+    // Helper to simulate network delays
+    function mockDelay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  </script>
+</body>
+</html>

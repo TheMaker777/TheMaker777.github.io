@@ -1,385 +1,433 @@
-<!-- ═══════════════════════════════════════════════════════
-     CHATBOT SNIPPET — paste into your index.html
-     Uses your existing glass-panel, action-btn, textarea styles
-     ══════════════════════════════════════════════════════ -->
-
-<!-- 1. Extra styles — paste inside your <head>
-     (only the chatbot-specific bits not already in your style.css) -->
-<style>
-  .chat-log {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid #555;
-    color: #4ade80;
-    padding: 0.75rem;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
-    height: 220px;
-    overflow-y: auto;
-    resize: vertical;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    scrollbar-width: thin;
-    scrollbar-color: #333 transparent;
-  }
-
-  .chat-log::-webkit-scrollbar { 
-    width: 3px; 
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chatbot | TheMaker777</title>
   
-  .chat-log::-webkit-scrollbar-thumb { 
-    background: #333; 
-  }
+  <!-- External Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  .chat-empty {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #555;
-    font-size: 0.7rem;
-    text-align: center;
-    line-height: 2;
-  }
-  
-  .chat-empty-sub {
-    font-size: 0.6rem;
-    color: #555;
-  }
+  <!-- Your Global Project CSS -->
+  <link rel="stylesheet" href="../style.css">
 
-  .cmsg { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 2px; 
-    animation: cmsgIn 0.15s ease-out; 
-  }
+  <!-- Chatbot Specific Styles -->
+  <style>
+    /* Add any page-specific layout tweaks here if needed */
+    body {
+      background-color: #000; /* Fallback for background.js */
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      overflow-x: hidden;
+    }
 
-  @keyframes cmsgIn { 
-    from { opacity: 0; transform: translateY(3px); } 
-    to { opacity: 1; transform: translateY(0); } 
-  }
+    /* Background Canvas */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+    }
 
-  .cmsg-who { 
-    font-size: 0.6rem; 
-    text-transform: uppercase; 
-    letter-spacing: 0.08em; 
-  }
-  
-  .cmsg.user .cmsg-who { color: #555; }
-  .cmsg.bot .cmsg-who { color: #4ade80; }
+    /* --- Chatbot Snippet Styles --- */
+    .chat-log {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #555;
+      color: #4ade80;
+      padding: 0.75rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      height: 300px; /* Slightly taller for standalone page */
+      overflow-y: auto;
+      resize: vertical;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      scrollbar-width: thin;
+      scrollbar-color: #333 transparent;
+    }
 
-  .cmsg-text { 
-    font-size: 0.75rem; 
-    line-height: 1.7; 
-    word-break: break-word; 
-    color: #ccc; 
-  }
-  
-  .cmsg.user .cmsg-text { color: #888; }
+    .chat-log::-webkit-scrollbar { 
+      width: 3px; 
+    }
+    
+    .chat-log::-webkit-scrollbar-thumb { 
+      background: #333; 
+    }
 
-  .cmsg-text code {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid #333;
-    padding: 1px 5px;
-    font-size: 0.7rem;
-    color: #4ade80;
-  }
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+      font-size: 0.7rem;
+      text-align: center;
+      line-height: 2;
+    }
+    
+    .chat-empty-sub {
+      font-size: 0.6rem;
+      color: #555;
+    }
 
-  .ctyping { 
-    display: flex; 
-    gap: 5px; 
-    align-items: center; 
-    padding: 3px 0; 
-  }
+    .cmsg { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 2px; 
+      animation: cmsgIn 0.15s ease-out; 
+    }
 
-  .ctyping-dot { 
-    width: 5px; 
-    height: 5px; 
-    border-radius: 50%; 
-    background: #4ade80; 
-    animation: ctdot 1.1s ease-in-out infinite; 
-  }
-  
-  .ctyping-dot:nth-child(2) { animation-delay: 0.18s; }
-  .ctyping-dot:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes cmsgIn { 
+      from { opacity: 0; transform: translateY(3px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
 
-  @keyframes ctdot { 
-    0%, 60%, 100% { opacity: .2; transform: translateY(0); } 
-    30% { opacity: 1; transform: translateY(-4px); } 
-  }
+    .cmsg-who { 
+      font-size: 0.6rem; 
+      text-transform: uppercase; 
+      letter-spacing: 0.08em; 
+    }
+    
+    .cmsg.user .cmsg-who { color: #555; }
+    .cmsg.bot .cmsg-who { color: #4ade80; }
 
-  .chat-chips {
-    display: flex; 
-    gap: 6px; 
-    flex-wrap: wrap;
-    margin-top: 0.75rem;
-  }
+    .cmsg-text { 
+      font-size: 0.75rem; 
+      line-height: 1.7; 
+      word-break: break-word; 
+      color: #ccc; 
+    }
+    
+    .cmsg.user .cmsg-text { color: #888; }
 
-  .chat-chip {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    padding: 3px 10px;
-    border: 1px solid #555;
-    color: #555;
-    background: transparent;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.2s;
-  }
+    .cmsg-text code {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #333;
+      padding: 1px 5px;
+      font-size: 0.7rem;
+      color: #4ade80;
+    }
 
-  .chat-chip:hover { 
-    border-color: #fff; 
-    color: #fff; 
-    background: rgba(255, 255, 255, 0.05); 
-  }
+    .ctyping { 
+      display: flex; 
+      gap: 5px; 
+      align-items: center; 
+      padding: 3px 0; 
+    }
 
-  .chat-input-row {
-    display: flex;
-    gap: 0;
-    margin-top: 0.75rem;
-  }
+    .ctyping-dot { 
+      width: 5px; 
+      height: 5px; 
+      border-radius: 50%; 
+      background: #4ade80; 
+      animation: ctdot 1.1s ease-in-out infinite; 
+    }
+    
+    .ctyping-dot:nth-child(2) { animation-delay: 0.18s; }
+    .ctyping-dot:nth-child(3) { animation-delay: 0.36s; }
 
-  /* Override textarea defaults for the chat input only */
-  .chat-input-row textarea {
-    min-height: unset;
-    height: 42px;
-    resize: none;
-    border: 1px solid #555;
-    border-right: none;
-    background: rgba(0, 0, 0, 0.6);
-    color: #ccc;
-    font-size: 0.8rem;
-    padding: 0.6rem 0.75rem;
-    flex: 1;
-    font-family: 'Space Mono', monospace;
-    outline: none;
-  }
+    @keyframes ctdot { 
+      0%, 60%, 100% { opacity: .2; transform: translateY(0); } 
+      30% { opacity: 1; transform: translateY(-4px); } 
+    }
 
-  .chat-input-row textarea:focus { border-color: #4ade80; }
-  .chat-input-row textarea::placeholder { color: #555; }
+    .chat-chips {
+      display: flex; 
+      gap: 6px; 
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
 
-  .chat-send-btn {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    padding: 0 1rem;
-    border: 1px solid #4ade80;
-    color: #4ade80;
-    background: rgba(74, 222, 128, 0.1);
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-    flex-shrink: 0;
-    outline: none;
-  }
+    .chat-chip {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 3px 10px;
+      border: 1px solid #555;
+      color: #555;
+      background: transparent;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
 
-  .chat-send-btn:hover:not(:disabled) { 
-    background: #4ade80; 
-    color: #000; 
-  }
-  
-  .chat-send-btn:disabled { 
-    border-color: #555; 
-    color: #555; 
-    cursor: not-allowed; 
-    background: transparent; 
-  }
+    .chat-chip:hover { 
+      border-color: #fff; 
+      color: #fff; 
+      background: rgba(255, 255, 255, 0.05); 
+    }
 
-  .chat-err {
-    margin-top: 0.5rem;
-    font-size: 0.7rem;
-    color: #ef4444;
-    font-family: 'Space Mono', monospace;
-    display: none;
-  }
+    .chat-input-row {
+      display: flex;
+      gap: 0;
+      margin-top: 0.75rem;
+    }
 
-  .chat-foot {
-    margin-top: 0.75rem;
-    font-size: 0.58rem;
-    color: #555;
-    font-family: 'Space Mono', monospace;
-    display: flex;
-    justify-content: space-between;
-  }
+    .chat-input-row textarea {
+      min-height: unset;
+      height: 42px;
+      resize: none;
+      border: 1px solid #555;
+      border-right: none;
+      background: rgba(0, 0, 0, 0.6);
+      color: #ccc;
+      font-size: 0.8rem;
+      padding: 0.6rem 0.75rem;
+      flex: 1;
+      font-family: 'Space Mono', monospace;
+      outline: none;
+    }
 
-  .chat-status-dot {
-    display: inline-block; 
-    width: 5px; 
-    height: 5px;
-    border-radius: 50%; 
-    background: #4ade80;
-    margin-right: 5px; 
-    vertical-align: middle;
-    animation: cspulse 2.5s ease-in-out infinite;
-  }
+    .chat-input-row textarea:focus { border-color: #4ade80; }
+    .chat-input-row textarea::placeholder { color: #555; }
 
-  @keyframes cspulse { 
-    0%, 100% { opacity: 1; } 
-    50% { opacity: 0.2; } 
-  }
-</style>
+    .chat-send-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      padding: 0 1rem;
+      border: 1px solid #4ade80;
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      outline: none;
+    }
 
+    .chat-send-btn:hover:not(:disabled) { 
+      background: #4ade80; 
+      color: #000; 
+    }
+    
+    .chat-send-btn:disabled { 
+      border-color: #555; 
+      color: #555; 
+      cursor: not-allowed; 
+      background: transparent; 
+    }
 
-<!-- 2. Widget HTML — paste wherever you want it in <body> -->
-<div class="glass-panel interactive-area">
-  <h2 class="text-xl font-bold mb-4 text-green-400 border-b border-gray-700 pb-2">/// ASK ME ANYTHING</h2>
+    .chat-err {
+      margin-top: 0.5rem;
+      font-size: 0.7rem;
+      color: #ef4444;
+      font-family: 'Space Mono', monospace;
+      display: none;
+    }
 
-  <div class="chat-log" id="chatLog">
-    <div class="chat-empty" id="chatEmpty">
-      <span>> waiting for input_</span>
-      <span class="chat-empty-sub">ask about projects, skills, or experience</span>
+    .chat-foot {
+      margin-top: 0.75rem;
+      font-size: 0.58rem;
+      color: #555;
+      font-family: 'Space Mono', monospace;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .chat-status-dot {
+      display: inline-block; 
+      width: 5px; 
+      height: 5px;
+      border-radius: 50%; 
+      background: #4ade80;
+      margin-right: 5px; 
+      vertical-align: middle;
+      animation: cspulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes cspulse { 
+      0%, 100% { opacity: 1; } 
+      50% { opacity: 0.2; } 
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen relative flex flex-col selection:bg-green-400 selection:text-black">
+
+  <!-- Interactive Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Main Content Container -->
+  <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4 sm:p-8">
+    
+    <!-- Navigation / Back Button -->
+    <div class="w-full max-w-3xl mb-6">
+      <a href="../index.html" class="inline-flex items-center text-sm text-gray-400 hover:text-green-400 transition-colors duration-200 uppercase tracking-widest">
+        <span class="mr-2">←</span> Back to Portfolio
+      </a>
     </div>
-  </div>
 
-  <div class="chat-chips">
-    <button class="chat-chip" onclick="fillPrompt(this)">what do you build?</button>
-    <button class="chat-chip" onclick="fillPrompt(this)">your stack?</button>
-    <button class="chat-chip" onclick="fillPrompt(this)">open to work?</button>
-    <button class="chat-chip" onclick="fillPrompt(this)">latest projects?</button>
-  </div>
+    <!-- Chatbot Widget / Glass Panel -->
+    <div class="glass-panel interactive-area w-full max-w-3xl p-6 md:p-8 rounded-xl backdrop-blur-md bg-black/40 border border-gray-800 shadow-2xl">
+      <h2 class="text-xl font-bold mb-4 text-green-400 border-b border-gray-700 pb-2 tracking-widest uppercase">/// Ask Me Anything</h2>
 
-  <div class="chat-input-row">
-    <textarea id="chatInput" placeholder="type a message..." autocomplete="off" spellcheck="false"></textarea>
-    <button class="chat-send-btn" id="chatSendBtn" onclick="sendMessage()">[ Send ]</button>
-  </div>
+      <div class="chat-log" id="chatLog">
+        <div class="chat-empty" id="chatEmpty">
+          <span>> waiting for input_</span>
+          <span class="chat-empty-sub">ask about projects, skills, or experience</span>
+        </div>
+      </div>
 
-  <div class="chat-err" id="chatErr"></div>
+      <div class="chat-chips">
+        <button class="chat-chip" onclick="fillPrompt(this)">what do you build?</button>
+        <button class="chat-chip" onclick="fillPrompt(this)">your stack?</button>
+        <button class="chat-chip" onclick="fillPrompt(this)">open to work?</button>
+        <button class="chat-chip" onclick="fillPrompt(this)">latest projects?</button>
+      </div>
 
-  <div class="chat-foot">
-    <span><span class="chat-status-dot"></span>groq · llama-3.3-70b</span>
-    <span>free tier · ~14k req/day</span>
-  </div>
-</div>
+      <div class="chat-input-row">
+        <textarea id="chatInput" placeholder="type a message..." autocomplete="off" spellcheck="false"></textarea>
+        <button class="chat-send-btn" id="chatSendBtn" onclick="sendMessage()">[ Send ]</button>
+      </div>
 
+      <div class="chat-err" id="chatErr"></div>
 
-<!-- 3. Script — paste before </body> (after background.js) -->
-<script>
-  // ── CONFIG ──────────────────────────────────────────────
-  const WORKER_URL = 'https://makers-assistant.mack-n332.workers.dev/';
+      <div class="chat-foot">
+        <span><span class="chat-status-dot"></span>groq · llama-3.3-70b</span>
+        <span>free tier · ~14k req/day</span>
+      </div>
+    </div>
+  </main>
 
-  const SYSTEM_PROMPT = `You are an AI assistant on TheMaker777's developer portfolio.
+  <!-- External Background Script (Must load after canvas) -->
+  <script src="../background.js"></script>
+
+  <!-- Chatbot Logic Script -->
+  <script>
+    // ── CONFIG ──────────────────────────────────────────────
+    const WORKER_URL = 'https://makers-assistant.mack-n332.workers.dev/';
+
+    const SYSTEM_PROMPT = `You are an AI assistant on TheMaker777's developer portfolio.
 Be concise, sharp, and friendly. Answer questions about their projects, skills,
 and experience. Keep replies to 2-3 sentences unless asked to elaborate.
 If you don't know something specific, say so and suggest checking the GitHub.`;
-  // ────────────────────────────────────────────────────────
+    // ────────────────────────────────────────────────────────
 
-  const chatHistory = [];
-  const chatLog     = document.getElementById('chatLog');
-  const chatInput   = document.getElementById('chatInput');
-  const chatSendBtn = document.getElementById('chatSendBtn');
-  const chatErr     = document.getElementById('chatErr');
+    const chatHistory = [];
+    const chatLog     = document.getElementById('chatLog');
+    const chatInput   = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    const chatErr     = document.getElementById('chatErr');
 
-  // Handle Enter key for sending messages
-  chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { 
-      e.preventDefault(); 
-      sendMessage(); 
-    }
-  });
-
-  // Populate input from suggestion chips
-  function fillPrompt(chip) {
-    chatInput.value = chip.textContent.trim();
-    chatInput.focus();
-  }
-
-  // Append a message to the chat log
-  function addMsg(role, text) {
-    document.getElementById('chatEmpty')?.remove();
-    
-    const el = document.createElement('div');
-    el.className = `cmsg ${role}`;
-    el.innerHTML = `
-      <span class="cmsg-who">> ${role === 'user' ? 'you' : 'assistant'}</span>
-      <div class="cmsg-text">${chatFmt(text)}</div>
-    `;
-    
-    chatLog.appendChild(el);
-    chatLog.scrollTop = chatLog.scrollHeight;
-  }
-
-  // Show the animated typing indicator
-  function addTyping() {
-    document.getElementById('chatEmpty')?.remove();
-    
-    const el = document.createElement('div');
-    el.className = 'cmsg bot'; 
-    el.id = 'chatTyping';
-    el.innerHTML = `
-      <span class="cmsg-who">> assistant</span>
-      <div class="ctyping">
-        <div class="ctyping-dot"></div>
-        <div class="ctyping-dot"></div>
-        <div class="ctyping-dot"></div>
-      </div>
-    `;
-    
-    chatLog.appendChild(el);
-    chatLog.scrollTop = chatLog.scrollHeight;
-  }
-
-  // Format the text to handle basic HTML escaping and markdown code blocks
-  function chatFmt(text) {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\n/g, '<br>');
-  }
-
-  // Display error messages
-  function showChatErr(msg) {
-    chatErr.textContent = '> error: ' + msg;
-    chatErr.style.display = 'block';
-    setTimeout(() => {
-      chatErr.style.display = 'none';
-    }, 5000);
-  }
-
-  // Handle the message sending logic
-  async function sendMessage() {
-    const text = chatInput.value.trim();
-    if (!text || chatSendBtn.disabled) return;
-
-    chatInput.value = '';
-    chatSendBtn.disabled = true;
-    chatErr.style.display = 'none';
-
-    addMsg('user', text);
-    chatHistory.push({ role: 'user', content: text });
-    addTyping();
-
-    try {
-      const res = await fetch(WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: chatHistory, 
-          system: SYSTEM_PROMPT 
-        }),
-      });
-      
-      const data = await res.json();
-      document.getElementById('chatTyping')?.remove();
-
-      if (!res.ok || data.error) {
-        showChatErr(data.error || `status ${res.status}`);
-        chatHistory.pop();
-      } else {
-        addMsg('bot', data.reply);
-        chatHistory.push({ role: 'assistant', content: data.reply });
+    // Handle Enter key for sending messages
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { 
+        e.preventDefault(); 
+        sendMessage(); 
       }
-    } catch (err) {
-      document.getElementById('chatTyping')?.remove();
-      showChatErr('could not reach worker — check WORKER_URL');
-      chatHistory.pop();
+    });
+
+    // Populate input from suggestion chips
+    function fillPrompt(chip) {
+      chatInput.value = chip.textContent.trim();
+      chatInput.focus();
     }
 
-    chatSendBtn.disabled = false;
-    chatInput.focus();
-  }
-</script>
+    // Append a message to the chat log
+    function addMsg(role, text) {
+      document.getElementById('chatEmpty')?.remove();
+      
+      const el = document.createElement('div');
+      el.className = `cmsg ${role}`;
+      el.innerHTML = `
+        <span class="cmsg-who">> ${role === 'user' ? 'you' : 'assistant'}</span>
+        <div class="cmsg-text">${chatFmt(text)}</div>
+      `;
+      
+      chatLog.appendChild(el);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // Show the animated typing indicator
+    function addTyping() {
+      document.getElementById('chatEmpty')?.remove();
+      
+      const el = document.createElement('div');
+      el.className = 'cmsg bot'; 
+      el.id = 'chatTyping';
+      el.innerHTML = `
+        <span class="cmsg-who">> assistant</span>
+        <div class="ctyping">
+          <div class="ctyping-dot"></div>
+          <div class="ctyping-dot"></div>
+          <div class="ctyping-dot"></div>
+        </div>
+      `;
+      
+      chatLog.appendChild(el);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // Format the text to handle basic HTML escaping and markdown code blocks
+    function chatFmt(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br>');
+    }
+
+    // Display error messages
+    function showChatErr(msg) {
+      chatErr.textContent = '> error: ' + msg;
+      chatErr.style.display = 'block';
+      setTimeout(() => {
+        chatErr.style.display = 'none';
+      }, 5000);
+    }
+
+    // Handle the message sending logic
+    async function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text || chatSendBtn.disabled) return;
+
+      chatInput.value = '';
+      chatSendBtn.disabled = true;
+      chatErr.style.display = 'none';
+
+      addMsg('user', text);
+      chatHistory.push({ role: 'user', content: text });
+      addTyping();
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            messages: chatHistory, 
+            system: SYSTEM_PROMPT 
+          }),
+        });
+        
+        const data = await res.json();
+        document.getElementById('chatTyping')?.remove();
+
+        if (!res.ok || data.error) {
+          showChatErr(data.error || `status ${res.status}`);
+          chatHistory.pop();
+        } else {
+          addMsg('bot', data.reply);
+          chatHistory.push({ role: 'assistant', content: data.reply });
+        }
+      } catch (err) {
+        document.getElementById('chatTyping')?.remove();
+        showChatErr('could not reach worker — check WORKER_URL');
+        chatHistory.pop();
+      }
+
+      chatSendBtn.disabled = false;
+      chatInput.focus();
+    }
+  </script>
+</body>
+</html>

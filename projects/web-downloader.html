@@ -8,6 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
 
+  <link rel="stylesheet" href="../style.css">
+  
   <style>
     body {
       background-color: #050505;
@@ -107,7 +109,22 @@
 </head>
 <body class="antialiased min-h-screen flex flex-col items-center justify-center p-4">
 
+  <!-- Interactive Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+   <!-- Navigation / Back Button -->
+    <div class="w-full max-w-4xl mb-6">
+      <a href="../index.html" class="inline-flex items-center text-sm text-gray-400 hover:text-green-400 transition-colors duration-200 uppercase tracking-widest">
+        <span class="mr-2">←</span> Back to Portfolio
+      </a>
+    </div>
+  
   <main class="w-full max-w-5xl border border-gray-800 bg-black shadow-2xl relative p-6 md:p-8">
+
+    <!-- Gear Settings Button -->
+    <button id="settingsBtn" class="absolute top-6 right-6 text-gray-600 hover:text-blue-500 transition-colors focus:outline-none" title="Engine Settings">
+      <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+    </button>
 
     <div class="border-b border-gray-800 pb-4 mb-6">
       <h2 class="text-2xl font-bold text-white tracking-widest uppercase flex items-center gap-2">
@@ -118,7 +135,7 @@
     </div>
 
     <!-- Controls -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
       <div class="md:col-span-6">
         <label class="text-xs text-gray-500 uppercase mb-1 block">Start URL (Base Path)</label>
         <input type="url" id="urlInput" class="archiver-input" placeholder="https://example.github.io/docs" value="https://">
@@ -132,16 +149,6 @@
           CRAWL & CONDENSE
         </button>
       </div>
-    </div>
-
-    <!-- Proxy Setup -->
-    <div class="mb-6">
-      <label class="text-xs text-gray-500 uppercase mb-1 block">Network Proxy Strategy</label>
-      <select id="proxySelect" class="archiver-input text-sm">
-        <option value="auto">Auto-Cascade (Tries Direct, then Proxies)</option>
-        <option value="allorigins">Strict: api.allorigins.win</option>
-        <option value="none">Strict: Direct Connection Only</option>
-      </select>
     </div>
 
     <!-- Stats -->
@@ -179,6 +186,48 @@
     </div>
 
   </main>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+    <div class="bg-[#0a0a0a] border border-gray-800 p-6 md:p-8 max-w-md w-full shadow-2xl relative">
+      <button id="closeSettingsBtn" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 focus:outline-none">
+        <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+      <h3 class="text-xl font-bold text-white mb-6 uppercase tracking-wider flex items-center gap-2">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 fill-blue-500"><path d="M19.14,12.94c0.04-0.3...z"/></svg>
+        Advanced Settings
+      </h3>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs text-gray-500 uppercase mb-1 block">Network Proxy Strategy</label>
+          <select id="proxySelect" class="archiver-input text-sm">
+            <option value="auto">Auto-Cascade (Tries Direct, then Proxies)</option>
+            <option value="allorigins">Strict: api.allorigins.win</option>
+            <option value="none">Strict: Direct Connection Only</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 uppercase mb-1 block">Request Timeout (ms)</label>
+          <input type="number" id="timeoutInput" class="archiver-input" value="10000">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 uppercase mb-1 block">Verbose Logging</label>
+          <select id="verboseSelect" class="archiver-input text-sm">
+            <option value="true">Enabled (Show All Info)</option>
+            <option value="false">Disabled (Errors Only)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <button id="saveSettingsBtn" class="btn-primary w-full">SAVE CONFIGURATION</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- External Background Script (Must load after canvas) -->
+  <script src="../background.js"></script>
 
   <script>
     const terminal = document.getElementById('terminal');
@@ -556,6 +605,39 @@
       isProcessing = false;
       startBtn.disabled = false;
       startBtn.innerHTML = `CRAWL & CONDENSE`;
+    }
+
+    // --- SETTINGS MODAL LOGIC ---
+    const settingsModal = document.getElementById('settingsModal');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', () => {
+        settingsModal.classList.remove('hidden');
+      });
+    }
+
+    if (closeSettingsBtn) {
+      closeSettingsBtn.addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+      });
+    }
+
+    if (saveSettingsBtn) {
+      saveSettingsBtn.addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+        log('Settings updated.', 'success');
+      });
+    }
+
+    if (settingsModal) {
+      settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+          settingsModal.classList.add('hidden');
+        }
+      });
     }
   </script>
 </body>

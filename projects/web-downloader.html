@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi-Page Web Condenser | V7 Engine</title>
+  <title>Multi-Page Web Condenser | V8.1 Engine</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <link rel="stylesheet" href="../style.css">
-  
   <style>
     body {
       background-color: #050505;
@@ -30,6 +28,7 @@
     }
 
     .archiver-input:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+    .archiver-input:disabled { color: #555; background: #111; cursor: not-allowed; }
 
     .btn-primary, .btn-success {
       color: #000;
@@ -109,16 +108,6 @@
 </head>
 <body class="antialiased min-h-screen flex flex-col items-center justify-center p-4">
 
-  <!-- Interactive Background Canvas -->
-  <canvas id="bg-canvas"></canvas>
-
-   <!-- Navigation / Back Button -->
-    <div class="w-full max-w-4xl mb-6">
-      <a href="../index.html" class="inline-flex items-center text-sm text-gray-400 hover:text-green-400 transition-colors duration-200 uppercase tracking-widest">
-        <span class="mr-2">←</span> Back to Portfolio
-      </a>
-    </div>
-  
   <main class="w-full max-w-5xl border border-gray-800 bg-black shadow-2xl relative p-6 md:p-8">
 
     <!-- Gear Settings Button -->
@@ -129,9 +118,9 @@
     <div class="border-b border-gray-800 pb-4 mb-6">
       <h2 class="text-2xl font-bold text-white tracking-widest uppercase flex items-center gap-2">
         <svg viewBox="0 0 24 24" class="w-6 h-6 fill-blue-500"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-        Multi-Page App Condenser V7
+        Multi-Page App Condenser V8.1
       </h2>
-      <p class="text-xs text-gray-500 mt-1">Engine: Sub-page Crawler & Iframe Router</p>
+      <p class="text-xs text-gray-500 mt-1">Engine: Sub-page Crawler & Iframe Router (Enhanced Proxies)</p>
     </div>
 
     <!-- Controls -->
@@ -173,8 +162,8 @@
 
     <!-- Terminal Output -->
     <div class="terminal-window" id="terminal">
-      <div class="term-line"><span class="term-info">[SYS]</span> V7 Crawler initialized.</div>
-      <div class="term-line"><span class="term-info">[SYS]</span> This tool packages an entire branch of a website into a single offline HTML file.</div>
+      <div class="term-line"><span class="term-info">[SYS]</span> V8.1 Crawler initialized. Improved Proxy Routing active.</div>
+      <div class="term-line"><span class="term-info">[SYS]</span> Note: Highly secure sites (Cloudflare) may still block browser-based scraping.</div>
     </div>
 
     <!-- Download Section -->
@@ -200,22 +189,25 @@
       
       <div class="space-y-4">
         <div>
-          <label class="text-xs text-gray-500 uppercase mb-1 block">Network Proxy Strategy</label>
-          <select id="proxySelect" class="archiver-input text-sm">
-            <option value="auto">Auto-Cascade (Tries Direct, then Proxies)</option>
-            <option value="allorigins">Strict: api.allorigins.win</option>
-            <option value="none">Strict: Direct Connection Only</option>
+          <label class="text-xs text-gray-500 uppercase mb-1 block">Crawl Scope</label>
+          <select id="singlePageSelect" class="archiver-input text-sm">
+            <option value="false">Multi-Page (Crawl Sub-pages)</option>
+            <option value="true">Single Page Only</option>
           </select>
         </div>
         <div>
-          <label class="text-xs text-gray-500 uppercase mb-1 block">Request Timeout (ms)</label>
-          <input type="number" id="timeoutInput" class="archiver-input" value="10000">
+          <label class="text-xs text-gray-500 uppercase mb-1 block">External Outlinks</label>
+          <select id="removeExternalsSelect" class="archiver-input text-sm">
+            <option value="false">Keep (Open in new tab)</option>
+            <option value="true">Remove Completely (Strict Internal)</option>
+          </select>
         </div>
         <div>
-          <label class="text-xs text-gray-500 uppercase mb-1 block">Verbose Logging</label>
-          <select id="verboseSelect" class="archiver-input text-sm">
-            <option value="true">Enabled (Show All Info)</option>
-            <option value="false">Disabled (Errors Only)</option>
+          <label class="text-xs text-gray-500 uppercase mb-1 block">Network Proxy Strategy</label>
+          <select id="proxySelect" class="archiver-input text-sm">
+            <option value="aggressive">Max Aggression (Cycles 3 Proxies)</option>
+            <option value="auto">Auto-Cascade (Direct -> allorigins)</option>
+            <option value="none">Strict: Direct Connection Only (Fails on CORS)</option>
           </select>
         </div>
       </div>
@@ -226,15 +218,17 @@
     </div>
   </div>
 
-  <!-- External Background Script (Must load after canvas) -->
-  <script src="../background.js"></script>
-
   <script>
     const terminal = document.getElementById('terminal');
     const startBtn = document.getElementById('startBtn');
     const urlInput = document.getElementById('urlInput');
     const maxPagesInput = document.getElementById('maxPagesInput');
+    
+    // Settings Elements
     const proxySelect = document.getElementById('proxySelect');
+    const singlePageSelect = document.getElementById('singlePageSelect');
+    const removeExternalsSelect = document.getElementById('removeExternalsSelect');
+    
     const downloadArea = document.getElementById('downloadArea');
     const downloadBtn = document.getElementById('downloadBtn');
 
@@ -252,6 +246,11 @@
     let assetsFound = 0;
     let assetsInlined = 0;
     let errors = 0;
+
+    // Toggle Max Pages input based on single page select
+    singlePageSelect.addEventListener('change', (e) => {
+      maxPagesInput.disabled = (e.target.value === 'true');
+    });
 
     function log(msg, type = 'info') {
       const line = document.createElement('div');
@@ -273,18 +272,24 @@
       elErrors.innerText = errors;
     }
 
-    // Proxy Fetch logic
+    // Advanced Proxy Fetch logic
     async function smartFetch(url) {
       const opts = { referrerPolicy: 'no-referrer' };
       const strat = proxySelect.value;
+      const encodedUrl = encodeURIComponent(url);
       
       let targets = [];
-      if (strat === 'auto') {
-        targets = [url, `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`];
-      } else if (strat === 'allorigins') {
-        targets = [`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`];
+      if (strat === 'aggressive') {
+        targets = [
+          url,
+          `https://api.allorigins.win/raw?url=${encodedUrl}`,
+          `https://corsproxy.io/?${encodedUrl}`,
+          `https://api.codetabs.com/v1/proxy?quest=${url}`
+        ];
+      } else if (strat === 'auto') {
+        targets = [url, `https://api.allorigins.win/raw?url=${encodedUrl}`];
       } else {
-        targets = [url];
+        targets = [url]; // Direct only
       }
 
       for (let i = 0; i < targets.length; i++) {
@@ -294,9 +299,11 @@
           if (res.ok) {
             return { res: res, finalUrl: (i === 0) ? res.url : url };
           }
-        } catch(e) {}
+        } catch(e) {
+            // Ignore individual fetch fails, loop will continue to next proxy
+        }
       }
-      throw new Error("HTTP 403 / CORS Blocked across all proxies.");
+      throw new Error("HTTP 403 / CORS Blocked. Target site likely uses Cloudflare/Bot-Protection preventing browser access.");
     }
 
     // Fetch asset -> Base64 Data URI
@@ -311,13 +318,12 @@
       });
     }
 
-    // Convert string to raw Base64 (safely handling text encoding)
+    // Convert string to raw Base64
     async function textToBase64(text, mimeType = 'text/html') {
       const blob = new Blob([text], { type: mimeType });
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-           // reader.result is something like "data:text/html;base64,PGh0bWw+..."
            const b64 = reader.result.split(',')[1]; 
            resolve(b64);
         };
@@ -354,7 +360,7 @@
       return finalCss;
     }
 
-    async function processPage(url, targetBaseUrl) {
+    async function processPage(url, targetBaseUrl, removeExternals) {
         log(`Crawling: ${url.substring(0, 60)}...`);
         const { res, finalUrl } = await smartFetch(url);
         const htmlContent = await res.text();
@@ -423,62 +429,57 @@
           } catch (e) { errors++; updateStats(); }
         }
 
-        // 4. Handle Links & Extract newly found sub-pages
+        // 4. Handle Links
         const foundLinks = [];
-        doc.querySelectorAll('a[href]').forEach(link => {
+        const allAnchors = Array.from(doc.querySelectorAll('a[href]'));
+        
+        for (let link of allAnchors) {
           const href = link.getAttribute('href');
-          if (!href || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('#') || href.startsWith('data:')) return;
+          if (!href || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('#') || href.startsWith('data:')) continue;
           
           try {
             const absUrl = new URL(href, baseHref).href;
             const cleanUrl = absUrl.split('#')[0];
 
-            // If the link is internal to our base path
             if (cleanUrl.startsWith(targetBaseUrl)) {
                 foundLinks.push(cleanUrl);
-                // The interceptor script will handle this link dynamically, 
-                // but we standardize the href just in case
                 link.setAttribute('href', absUrl); 
             } else {
-                // External link: force open in new tab so we don't lose the local file
-                link.setAttribute('href', absUrl);
-                link.setAttribute('target', '_blank');
+                if (removeExternals) {
+                    link.remove(); // Removes external links per settings
+                } else {
+                    link.setAttribute('href', absUrl);
+                    link.setAttribute('target', '_blank');
+                }
             }
           } catch (e) {}
-        });
+        }
 
-        // 5. Inject Interceptor Script into this page's body
+        // 5. Inject Interceptor Script
         const interceptor = doc.createElement('script');
         interceptor.textContent = `
-          // Single-File Internal Router
           document.addEventListener('click', function(e) {
             const a = e.target.closest('a');
             if (!a) return;
             try {
               if (window.parent && window.parent.handleNavigation) {
-                // If parent handles it, prevent default navigation
                 if (window.parent.handleNavigation(a.href)) {
                   e.preventDefault();
                 }
               }
-            } catch(err) { /* ignore cross-origin errors if any */ }
+            } catch(err) {}
           });
         `;
         doc.body.appendChild(interceptor);
 
         // Render back to string
         const finalDocHtml = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
-        
-        // Convert the full HTML string to base64 to avoid JSON escaping nightmares
         const base64Html = await textToBase64(finalDocHtml);
 
         pagesProcessed++;
         updateStats();
 
-        return {
-            base64Html: base64Html,
-            newLinks: foundLinks
-        };
+        return { base64Html: base64Html, newLinks: foundLinks };
     }
 
     async function startCondense() {
@@ -486,10 +487,12 @@
       
       let targetUrl = urlInput.value.trim();
       let maxPages = parseInt(maxPagesInput.value) || 5;
+      
+      const singlePageMode = singlePageSelect.value === 'true';
+      const removeExternals = removeExternalsSelect.value === 'true';
 
       if (!targetUrl) { log("Target URL is required.", "error"); return; }
       
-      // Target base URL limits the scope (e.g. only paths under example.com/docs/)
       let targetBaseUrl = targetUrl.split('#')[0];
       try { safeHostName = new URL(targetUrl).hostname.replace(/[^a-z0-9]/gi, '_').toLowerCase(); } 
       catch (e) { log("Invalid URL format.", "error"); return; }
@@ -502,30 +505,30 @@
       
       pagesProcessed = 0; assetsFound = 0; assetsInlined = 0; errors = 0; updateStats();
 
-      log(`=== INITIALIZING V7 ROUTER CRAWLER ===`, 'info');
+      log(`=== INITIALIZING V8.1 ROUTER CRAWLER ===`, 'info');
       log(`Starting at: ${targetUrl}`);
-      log(`Boundary Path: ${targetBaseUrl}`);
-      log(`Max pages limit: ${maxPages}`);
-
+      log(`Mode: ${singlePageMode ? 'Single Page' : 'Multi-Page'}`);
+      
       let queue = [targetBaseUrl];
       let visited = new Set();
-      let siteData = {}; // Stores URL -> Base64HTML
+      let siteData = {}; 
 
       try {
-        while (queue.length > 0 && visited.size < maxPages) {
+        while (queue.length > 0 && visited.size < (singlePageMode ? 1 : maxPages)) {
             let currentUrl = queue.shift();
             if (visited.has(currentUrl)) continue;
             
             visited.add(currentUrl);
 
             try {
-                let result = await processPage(currentUrl, targetBaseUrl);
+                let result = await processPage(currentUrl, targetBaseUrl, removeExternals);
                 siteData[currentUrl] = result.base64Html;
                 
-                // Add new links to queue
-                for (let link of result.newLinks) {
-                    if (!visited.has(link) && !queue.includes(link)) {
-                        queue.push(link);
+                if (!singlePageMode) {
+                    for (let link of result.newLinks) {
+                        if (!visited.has(link) && !queue.includes(link)) {
+                            queue.push(link);
+                        }
                     }
                 }
             } catch(e) {
@@ -534,11 +537,14 @@
             }
         }
 
+        if (Object.keys(siteData).length === 0) {
+            throw new Error("No pages were successfully downloaded. Site is likely blocking us.");
+        }
+
         log(`=== CRAWL COMPLETE ===`, 'success');
         log(`Generating master shell file...`);
 
         // Generate the Master Shell HTML
-        // This is a minimal wrapper that houses the JSON site map and the Iframe router
         const masterHtmlString = `<!DOCTYPE html>
 <html style="margin:0;padding:0;height:100%;overflow:hidden;background:#fff;">
 <head>
@@ -546,40 +552,24 @@
   <title>Offline Web App</title>
 </head>
 <body style="margin:0;padding:0;height:100%;overflow:hidden;">
-  <!-- Main Display -->
   <iframe id="viewer" style="width:100%;height:100%;border:none;background:#fff;"></iframe>
-  
-  <!-- Site Database (Base64 Encoded to prevent HTML injection breaks) -->
-  <script id="site-data" type="application/json">
-    ${JSON.stringify(siteData)}
-  <\/script>
-
-  <!-- Router Logic -->
+  <script id="site-data" type="application/json">${JSON.stringify(siteData)}<\/script>
   <script>
     const dbText = document.getElementById('site-data').textContent;
     const siteData = JSON.parse(dbText);
     const viewer = document.getElementById('viewer');
     
-    // Core navigation handler
     window.handleNavigation = function(targetUrl) {
       const cleanUrl = targetUrl.split('#')[0];
-      const hash = targetUrl.split('#')[1];
-
       if (siteData[cleanUrl]) {
-        // Fetch decodes the Base64 data URI natively into text
         fetch('data:text/html;base64,' + siteData[cleanUrl])
           .then(res => res.text())
-          .then(html => {
-            viewer.srcdoc = html;
-            // Native browsers might not allow pushState on file:// protocol easily
-            // but we can update the document title if we wanted to
-          });
-        return true; // Tells the child iframe script to prevent default click behavior
+          .then(html => { viewer.srcdoc = html; });
+        return true; 
       }
-      return false; // Not in database, let browser handle it (e.g. open in new tab)
+      return false; 
     };
 
-    // Initialize with the starting URL
     window.handleNavigation("${targetBaseUrl}");
   <\/script>
 </body>
@@ -628,7 +618,7 @@
     if (saveSettingsBtn) {
       saveSettingsBtn.addEventListener('click', () => {
         settingsModal.classList.add('hidden');
-        log('Settings updated.', 'success');
+        log('Settings updated and saved. Using Proxy Strategy: ' + proxySelect.value, 'success');
       });
     }
 

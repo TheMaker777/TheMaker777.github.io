@@ -3,482 +3,559 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web Archiver V2 | TheMaker777</title>
+  <title>Multi-Page Web Condenser | V7 Engine</title>
   
-  <!-- External Fonts & Tailwind -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Your Global Project CSS -->
-  <link rel="stylesheet" href="../css/style.css">
-
-  <!-- Archiver Specific Styles -->
   <style>
     body {
-      background-color: #000;
-      color: #fff;
+      background-color: #050505;
+      color: #e5e5e5;
       font-family: 'Space Mono', monospace;
       overflow-x: hidden;
     }
 
-    #bg-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    /* --- Archiver UI Styles --- */
-    .archiver-input-group {
-      display: flex;
-      gap: 0;
-      margin-bottom: 1rem;
-    }
-
     .archiver-input {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid #555;
-      border-right: none;
-      color: #4ade80;
+      background: rgba(10, 10, 10, 0.8);
+      border: 1px solid #333;
+      color: #3b82f6;
       padding: 0.75rem 1rem;
       font-family: 'Space Mono', monospace;
-      font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: all 0.2s;
+      width: 100%;
     }
 
-    .archiver-input:focus {
-      border-color: #4ade80;
-    }
+    .archiver-input:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
 
-    .archiver-input::placeholder {
-      color: #555;
-    }
-
-    .archiver-btn {
-      background: rgba(74, 222, 128, 0.1);
-      border: 1px solid #4ade80;
-      color: #4ade80;
-      padding: 0 1.5rem;
-      font-family: 'Space Mono', monospace;
+    .btn-primary, .btn-success {
+      color: #000;
+      padding: 0.75rem 1.5rem;
       font-weight: bold;
       text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .archiver-btn:hover:not(:disabled) {
-      background: #4ade80;
-      color: #000;
-    }
-
-    .archiver-btn:disabled {
-      border-color: #555;
-      color: #555;
-      background: transparent;
-      cursor: not-allowed;
-    }
-
-    /* Toggles */
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .hacker-toggle {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.75rem;
-      color: #aaa;
-      cursor: pointer;
+      width: 100%;
+      justify-content: center;
+      border: none;
     }
 
-    .hacker-toggle input {
-      display: none;
+    .btn-primary { background: #3b82f6; }
+    .btn-primary:hover:not(:disabled) { background: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+    .btn-primary:disabled { background: #111; color: #555; cursor: not-allowed; }
+
+    .btn-success { background: #10b981; animation: pulseGreen 2s infinite; }
+    .btn-success:hover { background: #34d399; }
+
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
-    .toggle-box {
-      width: 14px;
-      height: 14px;
-      border: 1px solid #555;
-      display: inline-block;
-      position: relative;
-      background: rgba(0,0,0,0.5);
-    }
-
-    .hacker-toggle input:checked + .toggle-box {
-      border-color: #4ade80;
-    }
-
-    .hacker-toggle input:checked + .toggle-box::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 8px;
-      height: 8px;
-      background: #4ade80;
-    }
-
-    .hacker-toggle input:checked ~ span {
-      color: #4ade80;
-    }
-
-    /* Terminal Output */
     .terminal-window {
-      background: rgba(0, 0, 0, 0.8);
+      background: #000;
       border: 1px solid #333;
-      border-top: 1px solid #555;
-      height: 200px;
+      border-left: 3px solid #3b82f6;
+      height: 350px;
       overflow-y: auto;
       padding: 1rem;
-      font-size: 0.7rem;
-      color: #ccc;
+      font-size: 0.75rem;
+      color: #aaa;
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
-      scrollbar-width: thin;
-      scrollbar-color: #4ade80 transparent;
-      margin-bottom: 1.5rem;
+      box-shadow: inset 0 0 20px rgba(0,0,0,1);
     }
+    .terminal-window::-webkit-scrollbar { width: 6px; }
+    .terminal-window::-webkit-scrollbar-thumb { background: #333; }
 
-    .terminal-window::-webkit-scrollbar { width: 4px; }
-    .terminal-window::-webkit-scrollbar-thumb { background: #4ade80; }
-
-    .term-line {
-      line-height: 1.4;
-      word-break: break-all;
-    }
-
+    .term-line { line-height: 1.4; word-break: break-all; }
     .term-time { color: #555; margin-right: 0.5rem; }
-    .term-info { color: #60a5fa; }
-    .term-success { color: #4ade80; }
-    .term-error { color: #ef4444; }
-    .term-warn { color: #fbbf24; }
+    .term-info { color: #3b82f6; margin-right: 0.5rem; }
+    .term-warn { color: #f59e0b; margin-right: 0.5rem; }
+    .term-success { color: #10b981; margin-right: 0.5rem; }
+    .term-error { color: #ef4444; margin-right: 0.5rem; }
 
-    /* History List */
-    .history-list {
-      display: flex;
-      flex-direction: column;
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 0.5rem;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+    @media (min-width: 768px) {
+      .stats-grid { gap: 1rem; }
     }
 
-    .history-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem;
-      border: 1px solid #333;
-      background: rgba(0,0,0,0.4);
-      font-size: 0.75rem;
-      transition: border-color 0.2s;
-    }
+    .stat-box { background: #0a0a0a; border: 1px solid #222; padding: 0.75rem; text-align: center; }
+    .stat-value { font-size: 1.25rem; font-weight: bold; color: #3b82f6; }
+    .stat-label { font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
 
-    .history-item:hover {
-      border-color: #555;
+    select.archiver-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1em;
     }
-
-    .history-link {
-      color: #4ade80;
-      text-decoration: none;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 60%;
-    }
-
-    .history-link:hover {
-      text-decoration: underline;
-    }
-
-    .history-actions a {
-      color: #aaa;
-      text-decoration: none;
-      margin-left: 0.5rem;
-      padding: 2px 6px;
-      border: 1px solid #333;
-    }
-
-    .history-actions a:hover {
-      color: #fff;
-      border-color: #fff;
-    }
-
-    .blinking-cursor {
-      display: inline-block;
-      width: 6px;
-      height: 12px;
-      background: #4ade80;
-      animation: blink 1s step-end infinite;
-      vertical-align: middle;
-      margin-left: 4px;
-    }
-
-    @keyframes blink { 50% { opacity: 0; } }
   </style>
 </head>
-<body class="antialiased min-h-screen relative flex flex-col selection:bg-green-400 selection:text-black">
+<body class="antialiased min-h-screen flex flex-col items-center justify-center p-4">
 
-  <!-- Interactive Background Canvas -->
-  <canvas id="bg-canvas"></canvas>
+  <main class="w-full max-w-5xl border border-gray-800 bg-black shadow-2xl relative p-6 md:p-8">
 
-  <!-- Main Content Container -->
-  <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4 sm:p-8">
-    
-    <!-- Navigation / Back Button -->
-    <div class="w-full max-w-4xl mb-6">
-      <a href="../index.html" class="inline-flex items-center text-sm text-gray-400 hover:text-green-400 transition-colors duration-200 uppercase tracking-widest">
-        <span class="mr-2">←</span> Back to Portfolio
-      </a>
+    <div class="border-b border-gray-800 pb-4 mb-6">
+      <h2 class="text-2xl font-bold text-white tracking-widest uppercase flex items-center gap-2">
+        <svg viewBox="0 0 24 24" class="w-6 h-6 fill-blue-500"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        Multi-Page App Condenser V7
+      </h2>
+      <p class="text-xs text-gray-500 mt-1">Engine: Sub-page Crawler & Iframe Router</p>
     </div>
 
-    <!-- Archiver Widget / Glass Panel -->
-    <div class="glass-panel interactive-area w-full max-w-4xl p-6 md:p-8 rounded-xl backdrop-blur-md bg-black/40 border border-gray-800 shadow-2xl">
-      
-      <div class="flex justify-between items-end border-b border-gray-700 pb-2 mb-6">
-        <h2 class="text-xl font-bold text-green-400 tracking-widest uppercase">/// Web_Archiver v2.0</h2>
-        <span class="text-xs text-gray-500 font-mono">Status: <span class="text-green-400">ONLINE</span></span>
+    <!-- Controls -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
+      <div class="md:col-span-6">
+        <label class="text-xs text-gray-500 uppercase mb-1 block">Start URL (Base Path)</label>
+        <input type="url" id="urlInput" class="archiver-input" placeholder="https://example.github.io/docs" value="https://">
       </div>
-
-      <!-- Input Section -->
-      <div class="archiver-input-group">
-        <input type="url" id="urlInput" class="archiver-input" placeholder="https://example.com/article-to-save" autocomplete="off">
-        <button id="archiveBtn" class="archiver-btn" onclick="startArchive()">[ INITIALIZE ]</button>
+      <div class="md:col-span-3">
+        <label class="text-xs text-gray-500 uppercase mb-1 block">Max Pages</label>
+        <input type="number" id="maxPagesInput" class="archiver-input" value="5" min="1" max="50">
       </div>
-
-      <!-- Options Section -->
-      <div class="options-grid">
-        <label class="hacker-toggle">
-          <input type="checkbox" id="optHtml" checked disabled>
-          <div class="toggle-box"></div>
-          <span>Save HTML</span>
-        </label>
-        <label class="hacker-toggle">
-          <input type="checkbox" id="optScreenshot" checked>
-          <div class="toggle-box"></div>
-          <span>Screenshot (PNG)</span>
-        </label>
-        <label class="hacker-toggle">
-          <input type="checkbox" id="optPdf">
-          <div class="toggle-box"></div>
-          <span>Export PDF</span>
-        </label>
-        <label class="hacker-toggle">
-          <input type="checkbox" id="optBypass">
-          <div class="toggle-box"></div>
-          <span>JS Bypass</span>
-        </label>
+      <div class="md:col-span-3 flex items-end">
+        <button id="startBtn" class="btn-primary" onclick="startCondense()">
+          CRAWL & CONDENSE
+        </button>
       </div>
-
-      <!-- Terminal Output -->
-      <div class="terminal-window" id="terminal">
-        <div class="term-line"><span class="term-time">[SYS]</span> Web Archiver initialized. Waiting for target URL...<span id="termCursor" class="blinking-cursor"></span></div>
-      </div>
-
-      <!-- Session History -->
-      <div class="mt-4">
-        <h3 class="text-xs text-gray-500 uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Session Archives</h3>
-        <div class="history-list" id="historyList">
-          <div class="text-xs text-gray-600 italic py-2">No items archived in this session yet.</div>
-        </div>
-      </div>
-
     </div>
+
+    <!-- Proxy Setup -->
+    <div class="mb-6">
+      <label class="text-xs text-gray-500 uppercase mb-1 block">Network Proxy Strategy</label>
+      <select id="proxySelect" class="archiver-input text-sm">
+        <option value="auto">Auto-Cascade (Tries Direct, then Proxies)</option>
+        <option value="allorigins">Strict: api.allorigins.win</option>
+        <option value="none">Strict: Direct Connection Only</option>
+      </select>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-value text-blue-500" id="statPages">0</div>
+        <div class="stat-label">Pages Crawled</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value text-purple-500" id="statAssetsFound">0</div>
+        <div class="stat-label">Assets Found</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value text-green-500" id="statAssetsInlined">0</div>
+        <div class="stat-label">Assets Inlined</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value text-red-500" id="statErrors">0</div>
+        <div class="stat-label">Errors</div>
+      </div>
+    </div>
+
+    <!-- Terminal Output -->
+    <div class="terminal-window" id="terminal">
+      <div class="term-line"><span class="term-info">[SYS]</span> V7 Crawler initialized.</div>
+      <div class="term-line"><span class="term-info">[SYS]</span> This tool packages an entire branch of a website into a single offline HTML file.</div>
+    </div>
+
+    <!-- Download Section -->
+    <div id="downloadArea" class="mt-6 hidden">
+      <button id="downloadBtn" class="btn-success">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        DOWNLOAD OFFLINE SITE APP (.HTML)
+      </button>
+    </div>
+
   </main>
 
-  <!-- External Background Script -->
-  <script src="../js/background.js"></script>
-
-  <!-- Archiver Logic Script -->
   <script>
-    // ── CONFIG ──────────────────────────────────────────────
-    // Replace this with your actual Cloudflare Worker or backend endpoint
-    const ARCHIVER_API_URL = 'https://YOUR_WORKER.YOUR_USERNAME.workers.dev/archive';
-    // ────────────────────────────────────────────────────────
-
-    const urlInput = document.getElementById('urlInput');
-    const archiveBtn = document.getElementById('archiveBtn');
     const terminal = document.getElementById('terminal');
-    const historyList = document.getElementById('historyList');
-    
-    let isArchiving = false;
-    let archiveHistory = [];
+    const startBtn = document.getElementById('startBtn');
+    const urlInput = document.getElementById('urlInput');
+    const maxPagesInput = document.getElementById('maxPagesInput');
+    const proxySelect = document.getElementById('proxySelect');
+    const downloadArea = document.getElementById('downloadArea');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-    // Handle Enter key
-    urlInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        startArchive();
-      }
-    });
+    const elPages = document.getElementById('statPages');
+    const elAssetsFound = document.getElementById('statAssetsFound');
+    const elAssetsInlined = document.getElementById('statAssetsInlined');
+    const elErrors = document.getElementById('statErrors');
 
-    function getTimestamp() {
-      const now = new Date();
-      return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-    }
+    let isProcessing = false;
+    let finalHtmlBlob = null;
+    let safeHostName = "site";
 
-    function logTerminal(msg, type = 'info') {
-      // Remove cursor from previous last line
-      const cursor = document.getElementById('termCursor');
-      if (cursor) cursor.remove();
+    // Global Stats
+    let pagesProcessed = 0;
+    let assetsFound = 0;
+    let assetsInlined = 0;
+    let errors = 0;
 
+    function log(msg, type = 'info') {
       const line = document.createElement('div');
       line.className = 'term-line';
-      
-      let typeClass = 'term-info';
-      let typeTag = '[NFO]';
-      if (type === 'success') { typeClass = 'term-success'; typeTag = '[OK!]'; }
-      if (type === 'error') { typeClass = 'term-error'; typeTag = '[ERR]'; }
-      if (type === 'warn') { typeClass = 'term-warn'; typeTag = '[WRN]'; }
-      if (type === 'sys') { typeClass = 'term-time'; typeTag = '[SYS]'; }
-
-      line.innerHTML = `<span class="term-time">${getTimestamp()}</span> <span class="${typeClass}">${typeTag}</span> ${msg}<span id="termCursor" class="blinking-cursor"></span>`;
-      
+      const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+      let typeClass = 'term-info'; let typeTag = '[NFO]';
+      if (type === 'success') { typeTag = '[OK!]'; typeClass = 'term-success'; }
+      if (type === 'warn') { typeTag = '[WRN]'; typeClass = 'term-warn'; }
+      if (type === 'error') { typeTag = '[ERR]'; typeClass = 'term-error'; }
+      line.innerHTML = `<span class="term-time">[${time}]</span> <span class="${typeClass}">${typeTag}</span> ${msg}`;
       terminal.appendChild(line);
       terminal.scrollTop = terminal.scrollHeight;
     }
 
-    function isValidUrl(string) {
-      try {
-        new URL(string);
-        return true;
-      } catch (_) {
-        return false;
-      }
+    function updateStats() {
+      elPages.innerText = pagesProcessed;
+      elAssetsFound.innerText = assetsFound;
+      elAssetsInlined.innerText = assetsInlined;
+      elErrors.innerText = errors;
     }
 
-    async function startArchive() {
-      if (isArchiving) return;
+    // Proxy Fetch logic
+    async function smartFetch(url) {
+      const opts = { referrerPolicy: 'no-referrer' };
+      const strat = proxySelect.value;
       
-      const targetUrl = urlInput.value.trim();
-      
-      if (!targetUrl) {
-        logTerminal('Target URL cannot be empty.', 'error');
-        return;
-      }
-      
-      let finalUrl = targetUrl;
-      if (!/^https?:\/\//i.test(finalUrl)) {
-        finalUrl = 'https://' + finalUrl;
-        urlInput.value = finalUrl;
+      let targets = [];
+      if (strat === 'auto') {
+        targets = [url, `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`];
+      } else if (strat === 'allorigins') {
+        targets = [`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`];
+      } else {
+        targets = [url];
       }
 
-      if (!isValidUrl(finalUrl)) {
-        logTerminal('Invalid URL format detected.', 'error');
-        return;
+      for (let i = 0; i < targets.length; i++) {
+        let t = targets[i];
+        try {
+          const res = await fetch(t, opts);
+          if (res.ok) {
+            return { res: res, finalUrl: (i === 0) ? res.url : url };
+          }
+        } catch(e) {}
+      }
+      throw new Error("HTTP 403 / CORS Blocked across all proxies.");
+    }
+
+    // Fetch asset -> Base64 Data URI
+    async function fetchAsDataUrl(url) {
+      const { res } = await smartFetch(url);
+      const blob = await res.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    // Convert string to raw Base64 (safely handling text encoding)
+    async function textToBase64(text, mimeType = 'text/html') {
+      const blob = new Blob([text], { type: mimeType });
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+           // reader.result is something like "data:text/html;base64,PGh0bWw+..."
+           const b64 = reader.result.split(',')[1]; 
+           resolve(b64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function processCssText(cssText, cssBaseUrl) {
+      const urlRegex = /url\(\s*(?:'|")?(.*?)(?:'|")?\s*\)/gi;
+      let match;
+      const replacements = [];
+
+      while ((match = urlRegex.exec(cssText)) !== null) {
+        const originalUrl = match[1].trim();
+        if (originalUrl.startsWith('data:') || originalUrl.startsWith('#')) continue;
+
+        assetsFound++; updateStats();
+
+        try {
+          const absUrl = new URL(originalUrl, cssBaseUrl).href;
+          const dataUrl = await fetchAsDataUrl(absUrl);
+          replacements.push({ orig: match[0], newStr: `url("${dataUrl}")` });
+          assetsInlined++; updateStats();
+        } catch (e) {
+          errors++; updateStats();
+        }
       }
 
-      // Gather options
-      const opts = {
-        screenshot: document.getElementById('optScreenshot').checked,
-        pdf: document.getElementById('optPdf').checked,
-        jsBypass: document.getElementById('optBypass').checked
-      };
+      let finalCss = cssText;
+      for (const rep of replacements) {
+        finalCss = finalCss.split(rep.orig).join(rep.newStr);
+      }
+      return finalCss;
+    }
 
-      // Lock UI
-      isArchiving = true;
-      archiveBtn.disabled = true;
-      archiveBtn.textContent = '[ PROCESSING... ]';
-      urlInput.disabled = true;
+    async function processPage(url, targetBaseUrl) {
+        log(`Crawling: ${url.substring(0, 60)}...`);
+        const { res, finalUrl } = await smartFetch(url);
+        const htmlContent = await res.text();
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlContent, "text/html");
 
-      logTerminal(`----------------------------------------`, 'sys');
-      logTerminal(`Initializing archive sequence for: ${finalUrl}`, 'info');
-      logTerminal(`Options config: HTML=true, PNG=${opts.screenshot}, PDF=${opts.pdf}, JS_BYPASS=${opts.jsBypass}`, 'info');
+        let baseHref = finalUrl.split('#')[0];
+        const baseTag = doc.querySelector('base[href]');
+        if (baseTag) {
+          baseHref = new URL(baseTag.getAttribute('href'), finalUrl).href;
+          baseTag.remove();
+        }
+
+        // 1. Process CSS Links
+        const stylesheets = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+        for (const link of stylesheets) {
+          const href = link.getAttribute('href');
+          if (!href) continue;
+          assetsFound++; updateStats();
+          try {
+            const absUrl = new URL(href, baseHref).href;
+            const { res: cssRes } = await smartFetch(absUrl);
+            let cssText = await cssRes.text();
+            cssText = await processCssText(cssText, absUrl);
+            const styleTag = doc.createElement('style');
+            styleTag.textContent = cssText;
+            link.replaceWith(styleTag);
+            assetsInlined++; updateStats();
+          } catch (e) { errors++; updateStats(); }
+        }
+
+        // 2. Process Media
+        const mediaElements = Array.from(doc.querySelectorAll('img[src], source[src], link[rel="icon"], link[rel="shortcut icon"]'));
+        for (const el of mediaElements) {
+          const attr = el.tagName.toLowerCase() === 'link' ? 'href' : 'src';
+          const src = el.getAttribute(attr);
+          if (!src || src.startsWith('data:')) continue;
+          
+          if (el.hasAttribute('srcset')) el.removeAttribute('srcset');
+          if (el.hasAttribute('sizes')) el.removeAttribute('sizes');
+          if (el.hasAttribute('loading')) el.removeAttribute('loading');
+
+          assetsFound++; updateStats();
+          try {
+            const absUrl = new URL(src, baseHref).href;
+            const dataUrl = await fetchAsDataUrl(absUrl);
+            el.setAttribute(attr, dataUrl);
+            assetsInlined++; updateStats();
+          } catch (e) { errors++; updateStats(); }
+        }
+
+        // 3. Process Scripts
+        const scripts = Array.from(doc.querySelectorAll('script[src]'));
+        for (const script of scripts) {
+          const src = script.getAttribute('src');
+          if (!src || src.startsWith('data:')) continue;
+          assetsFound++; updateStats();
+          try {
+            const absUrl = new URL(src, baseHref).href;
+            const { res: scriptRes } = await smartFetch(absUrl);
+            const scriptText = await scriptRes.text();
+            script.removeAttribute('src');
+            script.textContent = scriptText;
+            assetsInlined++; updateStats();
+          } catch (e) { errors++; updateStats(); }
+        }
+
+        // 4. Handle Links & Extract newly found sub-pages
+        const foundLinks = [];
+        doc.querySelectorAll('a[href]').forEach(link => {
+          const href = link.getAttribute('href');
+          if (!href || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('#') || href.startsWith('data:')) return;
+          
+          try {
+            const absUrl = new URL(href, baseHref).href;
+            const cleanUrl = absUrl.split('#')[0];
+
+            // If the link is internal to our base path
+            if (cleanUrl.startsWith(targetBaseUrl)) {
+                foundLinks.push(cleanUrl);
+                // The interceptor script will handle this link dynamically, 
+                // but we standardize the href just in case
+                link.setAttribute('href', absUrl); 
+            } else {
+                // External link: force open in new tab so we don't lose the local file
+                link.setAttribute('href', absUrl);
+                link.setAttribute('target', '_blank');
+            }
+          } catch (e) {}
+        });
+
+        // 5. Inject Interceptor Script into this page's body
+        const interceptor = doc.createElement('script');
+        interceptor.textContent = `
+          // Single-File Internal Router
+          document.addEventListener('click', function(e) {
+            const a = e.target.closest('a');
+            if (!a) return;
+            try {
+              if (window.parent && window.parent.handleNavigation) {
+                // If parent handles it, prevent default navigation
+                if (window.parent.handleNavigation(a.href)) {
+                  e.preventDefault();
+                }
+              }
+            } catch(err) { /* ignore cross-origin errors if any */ }
+          });
+        `;
+        doc.body.appendChild(interceptor);
+
+        // Render back to string
+        const finalDocHtml = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+        
+        // Convert the full HTML string to base64 to avoid JSON escaping nightmares
+        const base64Html = await textToBase64(finalDocHtml);
+
+        pagesProcessed++;
+        updateStats();
+
+        return {
+            base64Html: base64Html,
+            newLinks: foundLinks
+        };
+    }
+
+    async function startCondense() {
+      if (isProcessing) return;
+      
+      let targetUrl = urlInput.value.trim();
+      let maxPages = parseInt(maxPagesInput.value) || 5;
+
+      if (!targetUrl) { log("Target URL is required.", "error"); return; }
+      
+      // Target base URL limits the scope (e.g. only paths under example.com/docs/)
+      let targetBaseUrl = targetUrl.split('#')[0];
+      try { safeHostName = new URL(targetUrl).hostname.replace(/[^a-z0-9]/gi, '_').toLowerCase(); } 
+      catch (e) { log("Invalid URL format.", "error"); return; }
+
+      isProcessing = true;
+      startBtn.disabled = true;
+      startBtn.innerHTML = 'CRAWLING...';
+      downloadArea.classList.add('hidden');
+      terminal.innerHTML = ''; 
+      
+      pagesProcessed = 0; assetsFound = 0; assetsInlined = 0; errors = 0; updateStats();
+
+      log(`=== INITIALIZING V7 ROUTER CRAWLER ===`, 'info');
+      log(`Starting at: ${targetUrl}`);
+      log(`Boundary Path: ${targetBaseUrl}`);
+      log(`Max pages limit: ${maxPages}`);
+
+      let queue = [targetBaseUrl];
+      let visited = new Set();
+      let siteData = {}; // Stores URL -> Base64HTML
 
       try {
-        // --- SIMULATED BACKEND PROCESS ---
-        // In a real scenario, you would do a fetch() to your worker here.
-        // const res = await fetch(ARCHIVER_API_URL, { method: 'POST', body: JSON.stringify({ url: finalUrl, ...opts }) });
-        // const data = await res.json();
-        
-        // Simulating the steps for visual feedback
-        await mockDelay(800);
-        logTerminal('Resolving DNS and establishing connection...', 'info');
-        
-        await mockDelay(1200);
-        logTerminal('Fetching DOM footprint and static assets...', 'info');
-        
-        if (opts.jsBypass) {
-          await mockDelay(1500);
-          logTerminal('Executing JS bypass sequence (Puppeteer instance headless)...', 'warn');
+        while (queue.length > 0 && visited.size < maxPages) {
+            let currentUrl = queue.shift();
+            if (visited.has(currentUrl)) continue;
+            
+            visited.add(currentUrl);
+
+            try {
+                let result = await processPage(currentUrl, targetBaseUrl);
+                siteData[currentUrl] = result.base64Html;
+                
+                // Add new links to queue
+                for (let link of result.newLinks) {
+                    if (!visited.has(link) && !queue.includes(link)) {
+                        queue.push(link);
+                    }
+                }
+            } catch(e) {
+                log(`Failed to process page: ${currentUrl} - ${e.message}`, 'warn');
+                errors++; updateStats();
+            }
         }
 
-        await mockDelay(1000);
-        logTerminal('Serializing HTML payload...', 'info');
+        log(`=== CRAWL COMPLETE ===`, 'success');
+        log(`Generating master shell file...`);
 
-        if (opts.screenshot) {
-          await mockDelay(1500);
-          logTerminal('Rendering viewport and capturing PNG screenshot...', 'info');
-        }
+        // Generate the Master Shell HTML
+        // This is a minimal wrapper that houses the JSON site map and the Iframe router
+        const masterHtmlString = `<!DOCTYPE html>
+<html style="margin:0;padding:0;height:100%;overflow:hidden;background:#fff;">
+<head>
+  <meta charset="UTF-8">
+  <title>Offline Web App</title>
+</head>
+<body style="margin:0;padding:0;height:100%;overflow:hidden;">
+  <!-- Main Display -->
+  <iframe id="viewer" style="width:100%;height:100%;border:none;background:#fff;"></iframe>
+  
+  <!-- Site Database (Base64 Encoded to prevent HTML injection breaks) -->
+  <script id="site-data" type="application/json">
+    ${JSON.stringify(siteData)}
+  <\/script>
 
-        if (opts.pdf) {
-          await mockDelay(2000);
-          logTerminal('Compiling layout to PDF format...', 'info');
-        }
+  <!-- Router Logic -->
+  <script>
+    const dbText = document.getElementById('site-data').textContent;
+    const siteData = JSON.parse(dbText);
+    const viewer = document.getElementById('viewer');
+    
+    // Core navigation handler
+    window.handleNavigation = function(targetUrl) {
+      const cleanUrl = targetUrl.split('#')[0];
+      const hash = targetUrl.split('#')[1];
 
-        await mockDelay(1000);
-        logTerminal('Uploading blobs to R2 storage bucket...', 'info');
+      if (siteData[cleanUrl]) {
+        // Fetch decodes the Base64 data URI natively into text
+        fetch('data:text/html;base64,' + siteData[cleanUrl])
+          .then(res => res.text())
+          .then(html => {
+            viewer.srcdoc = html;
+            // Native browsers might not allow pushState on file:// protocol easily
+            // but we can update the document title if we wanted to
+          });
+        return true; // Tells the child iframe script to prevent default click behavior
+      }
+      return false; // Not in database, let browser handle it (e.g. open in new tab)
+    };
 
-        await mockDelay(800);
+    // Initialize with the starting URL
+    window.handleNavigation("${targetBaseUrl}");
+  <\/script>
+</body>
+</html>`;
+
+        finalHtmlBlob = new Blob([masterHtmlString], { type: 'text/html' });
+        log(`Master Offline App Ready! (${(finalHtmlBlob.size / 1024 / 1024).toFixed(2)} MB)`, 'success');
         
-        // Simulated successful response
-        const fakeResponse = {
-          id: Math.random().toString(36).substr(2, 9),
-          url: finalUrl,
-          archiveUrl: `https://archive.themaker777.com/${Math.random().toString(36).substr(2, 6)}`
+        downloadArea.classList.remove('hidden');
+        downloadBtn.onclick = () => {
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(finalHtmlBlob);
+          a.download = `${safeHostName}_app.html`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
         };
 
-        logTerminal(`Archive successful. ID: ${fakeResponse.id}`, 'success');
-        
-        // Add to history
-        addHistoryItem(fakeResponse);
-
       } catch (err) {
-        logTerminal(`Fatal error during archiving: ${err.message}`, 'error');
-      } finally {
-        // Unlock UI
-        isArchiving = false;
-        archiveBtn.disabled = false;
-        archiveBtn.textContent = '[ INITIALIZE ]';
-        urlInput.disabled = false;
-        urlInput.value = '';
-        urlInput.focus();
-      }
-    }
-
-    function addHistoryItem(data) {
-      if (archiveHistory.length === 0) {
-        historyList.innerHTML = ''; // clear empty message
+        log(`FATAL ERROR: ${err.message}`, 'error');
       }
 
-      archiveHistory.unshift(data); // add to beginning
-
-      const item = document.createElement('div');
-      item.className = 'history-item';
-      item.innerHTML = `
-        <a href="${data.url}" target="_blank" class="history-link" title="${data.url}">${data.url}</a>
-        <div class="history-actions">
-          <a href="${data.archiveUrl}" target="_blank" title="View Archive">HTML</a>
-          <a href="${data.archiveUrl}.png" target="_blank" title="View Screenshot">PNG</a>
-        </div>
-      `;
-      
-      historyList.insertBefore(item, historyList.firstChild);
-    }
-
-    // Helper to simulate network delays
-    function mockDelay(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      isProcessing = false;
+      startBtn.disabled = false;
+      startBtn.innerHTML = `CRAWL & CONDENSE`;
     }
   </script>
 </body>
